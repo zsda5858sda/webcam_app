@@ -41,5 +41,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Flutter requires access to microphone.</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>Flutter requires access to camera.</string>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Save video in gallery</string>
 </dict>
 </plist>
