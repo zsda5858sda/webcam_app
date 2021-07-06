@@ -1,12 +1,21 @@
-import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+  }
+
+  await Permission.camera.request();
+  await Permission.storage.request();
+  await Permission.microphone.request();
+
   runApp(MyApp());
 }
 
@@ -16,11 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '點餐系統',
-      theme: ThemeData(
-        primaryColor: Colors.yellow,
-        scaffoldBackgroundColor: Colors.white,
-      ),
+      title: '視訊系統',
       home: HomeScreen(),
     );
   }
