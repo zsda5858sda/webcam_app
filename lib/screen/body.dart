@@ -36,14 +36,6 @@ class Body extends StatelessWidget {
           ScreenButton(
             btnName: "行員登入",
             webView: () async {
-              WidgetsFlutterBinding.ensureInitialized();
-              await Permission.camera.request();
-              await Permission.microphone.request();
-
-              if (Platform.isAndroid) {
-                await AndroidInAppWebViewController
-                    .setWebContentsDebuggingEnabled(true);
-              }
               Navigator.push(
                 context,
                 MaterialPageRoute(

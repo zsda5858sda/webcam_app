@@ -60,14 +60,6 @@ class _UserScreen extends State<UserScreen> {
                 btnName: "進行視訊",
                 webView: () async {
                   dynamic data = [myController.text];
-                  WidgetsFlutterBinding.ensureInitialized();
-                  await Permission.camera.request();
-                  await Permission.microphone.request();
-
-                  if (Platform.isAndroid) {
-                    await AndroidInAppWebViewController
-                        .setWebContentsDebuggingEnabled(true);
-                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(

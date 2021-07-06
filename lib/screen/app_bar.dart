@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 AppBar homeAppBar(BuildContext context) {
   Size size = MediaQuery.of(context).size;
@@ -12,7 +11,7 @@ AppBar homeAppBar(BuildContext context) {
     // ),
     title: Image.asset(
       "assets/images/logo2.png",
-      width: size.width*0.7,
+      width: size.width * 0.7,
       fit: BoxFit.cover,
     ),
     centerTitle: true,
