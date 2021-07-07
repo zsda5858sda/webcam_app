@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webcam_app/screen/image_upload.dart';
-
-import 'app_bar.dart';
-import 'body.dart';
-
+import 'package:webcam_app/screen/component/app_bar.dart';
+import 'package:webcam_app/screen/body.dart';
 
 class HomeScreen extends StatelessWidget {
 

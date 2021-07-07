@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:webcam_app/screen/file_upload.dart';
-import 'package:webcam_app/screen/user_login.dart';
-import 'admin_screen.dart';
-import 'user_login.dart';
-import 'button.dart';
+import 'package:webcam_app/screen/user/file_upload.dart';
+import 'clerk/admin_screen.dart';
+import 'component/button.dart';
 
 class Body extends StatelessWidget {
   @override

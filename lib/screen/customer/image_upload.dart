@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:webcam_app/my_flutter_app_icons.dart';
 
 class ImagePickerPage extends StatefulWidget {
   const ImagePickerPage({Key? key}) : super(key: key);
@@ -17,10 +14,6 @@ class ImagePickerPage extends StatefulWidget {
 
 class _ImagePickerPageState extends State<ImagePickerPage> {
   List<PickedFile>? _imageFileList;
-
-  set _imageFile(PickedFile? value) {
-    _imageFileList = value == null ? null : [value];
-  }
 
   dynamic _pickImageError;
   final ImagePicker _picker = ImagePicker();
@@ -66,6 +59,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
       } catch (e) {
         setState(() {
           _pickImageError = e;
+          print(_pickImageError);
         });
       }
     }
