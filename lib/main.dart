@@ -11,10 +11,7 @@ Future main() async {
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
-
-  await Permission.camera.request();
   await Permission.storage.request();
-  await Permission.microphone.request();
 
   runApp(MyApp());
 }
