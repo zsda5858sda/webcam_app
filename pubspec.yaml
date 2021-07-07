@@ -23,6 +23,7 @@ dependencies:
   http_parser: ^4.0.0
   dio: ^4.0.0
   flutter_easyloading: ^2.2.2
+  firebase_messaging: ^10.0.3
 
 
   
@@ -36,10 +37,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-  fonts:
-  - family: CustomIcons
-    fonts:
-      - asset: fonts/CustomIcons.ttf
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

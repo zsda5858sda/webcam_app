@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "292249661935",
+    "project_id": "ubot-webcam-app",
+    "storage_bucket": "ubot-webcam-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292249661935:android:ba5608fa4d68756628c61a",
+        "android_client_info": {
+          "package_name": "com.ubot.webcam_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "292249661935-hg4kjum6t9v4031vdk1u0ssh7uqadv7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEp3rRS6y53p227xb7GqnHBpRII5QDo7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "292249661935-hg4kjum6t9v4031vdk1u0ssh7uqadv7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
