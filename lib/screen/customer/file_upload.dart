@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webcam_app/screen/image_upload.dart';
+import 'package:webcam_app/screen/customer/image_upload.dart';
 
 class FileUpload extends StatelessWidget {
   const FileUpload({Key? key}) : super(key: key);

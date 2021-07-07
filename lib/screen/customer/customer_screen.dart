@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:webcam_app/screen/user_meet.dart';
-import 'button.dart';
+import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/screen/customer/customer_meet.dart';
 
-class UserScreen extends StatefulWidget {
+class CustomerScreen extends StatefulWidget {
   @override
-  _UserScreen createState() => new _UserScreen();
+  _CustomerScreen createState() => new _CustomerScreen();
 }
 
-class _UserScreen extends State<UserScreen> {
+class _CustomerScreen extends State<CustomerScreen> {
   final myController = TextEditingController();
   @override
   Widget build(BuildContext context) {
