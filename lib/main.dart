@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:webcam_app/screen/user/home_screen.dart';
+import 'package:webcam_app/screen/home_screen.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
