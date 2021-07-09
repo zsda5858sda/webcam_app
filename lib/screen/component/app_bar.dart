@@ -5,10 +5,6 @@ AppBar homeAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Colors.white,
     elevation: 0,
-    // leading: IconButton(
-    //   icon: SvgPicture.asset("assets/icons/menu.svg"),
-    //   onPressed: () {},
-    // ),
     title: Image.asset(
       "assets/images/logo2.png",
       width: size.width * 0.7,

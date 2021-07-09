@@ -26,6 +26,8 @@ dependencies:
   shared_preferences: ^2.0.6
   file_picker: ^3.0.0
   flutter_local_notifications: ^5.0.0
+  firebase_messaging: ^10.0.3
+
 
   
   cupertino_icons: ^1.0.2
@@ -38,7 +40,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
- 
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
