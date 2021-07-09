@@ -1,73 +1,54 @@
+// ignore_for_file: public_member_api_docs
+
+import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:webcam_app/my_flutter_app_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
+import 'package:webcam_app/screen/server_behavior.dart';
 
-class ImagePickerPage extends StatefulWidget {
-  const ImagePickerPage({Key? key}) : super(key: key);
+class UploadScreen extends StatefulWidget {
+  const UploadScreen({
+    Key? key,
+    required this.uploader,
+    required this.uploadURL,
+    required this.onUploadStarted,
+  }) : super(key: key);
+
+  final FlutterUploader uploader;
+  final Uri uploadURL;
+  final VoidCallback onUploadStarted;
 
   @override
-  _ImagePickerPageState createState() => _ImagePickerPageState();
+  _UploadScreenState createState() => _UploadScreenState();
 }
 
-class _ImagePickerPageState extends State<ImagePickerPage> {
-  List<PickedFile>? _imageFileList;
+class _UploadScreenState extends State<UploadScreen> {
+  ImagePicker imagePicker = ImagePicker();
 
-  set _imageFile(PickedFile? value) {
-    _imageFileList = value == null ? null : [value];
-  }
+  ServerBehavior _serverBehavior = ServerBehavior.defaultOk200;
 
-  dynamic _pickImageError;
-  final ImagePicker _picker = ImagePicker();
-  Dio dio = Dio();
-  void _onImageButtonPressed(ImageSource source,
-      {BuildContext? context, bool isMultiImage = true}) async {
-    if (isMultiImage) {
-      try {
-        final pickedFileList = await _picker.getMultiImage();
-        setState(() {
-          _imageFileList = pickedFileList;
-        });
-        if (null != _imageFileList) {
-          final int num = _imageFileList!.length;
-          if (num > 5) {
-            errorAlert("照片最多上傳五張");
-          } else {
-            var a = 3;
-            for (int i = 0; i < num; i++) {
-              Uint8List byteData = await _imageFileList![0].readAsBytes();
-              List<int> imageData = byteData.buffer.asUint8List();
-              a = a + 1;
-              var n = a.toString();
-              MultipartFile multipartFile = MultipartFile.fromBytes(
-                imageData,
-                filename: 'work01T-A123456789-' + n + '.jpg',
-                contentType: MediaType('image', 'jpg'),
-              );
-              FormData formData = FormData.fromMap({
-                "uploaded_file": multipartFile,
-              });
-              var url = "https://vsid.ubt.ubot.com.tw:81/uploadpic";
-              var response = await dio.post(url, data: formData);
-              if (response.statusCode == 200) {
-                successAlert("上傳成功!!");
-                debugPrint(multipartFile.filename);
-              } else {
-                debugPrint(response.statusMessage);
-              }
-            }
-          }
+  @override
+  void initState() {
+    super.initState();
+
+    if (Platform.isAndroid) {
+      imagePicker.getLostData().then((lostData) {
+        if (lostData.isEmpty) {
+          return;
         }
-      } catch (e) {
-        setState(() {
-          _pickImageError = e;
-        });
-      }
+
+        if (lostData.type == RetrieveType.image) {
+          _handleFileUpload([lostData.file!.path]);
+        }
+        if (lostData.type == RetrieveType.video) {
+          _handleFileUpload([lostData.file!.path]);
+        }
+      });
     }
   }
 
@@ -118,13 +99,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
           FlatButton(
             minWidth: size.width * 0.5,
             height: size.height * 0.08,
-            onPressed: () {
-              _onImageButtonPressed(
-                ImageSource.gallery,
-                context: context,
-                isMultiImage: true,
-              );
-            },
+            onPressed: () => getMultiple(binary: true),
             child: Text('上傳文件(多選)',
                 style:
                     TextStyle(color: Colors.blue, fontSize: size.width * 0.06)),
@@ -150,95 +125,121 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
                 side: BorderSide(
                     color: Colors.red, width: 1, style: BorderStyle.solid),
                 borderRadius: BorderRadius.circular(30)),
-          )
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () => widget.uploader.cancelAll(),
+                child: Text('Cancel All'),
+              ),
+              Container(width: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  widget.uploader.clearUploads();
+                },
+                child: Text('Clear Uploads'),
+              )
+            ],
+          ),
         ],
       ),
     );
   }
 
-  void successAlert(String message) {
-    AlertDialog dialog = AlertDialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(15)),
-      ),
-      content: Row(
-        children: <Widget>[
-          Icon(
-            Icons.check_circle_outline,
-            color: Colors.green,
-            size: 30,
-          ),
-          Padding(padding: EdgeInsets.only(right: 10)),
-          Text(
-            message,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.pop(context, true);
-          },
-          child: Text(
-            "CLOSE",
-            style: TextStyle(color: Colors.black),
-          ),
-        ),
-      ],
-    );
+  Future getImage({required bool binary}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('binary', binary);
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) => dialog,
-    );
+    var image = await imagePicker.getImage(source: ImageSource.gallery);
+    String dir = path.dirname(image!.path);
+    String newPath = path.join(dir, 'work01T-A12345678-1.jpg');
+
+    debugPrint('NewPath: ${newPath}');
+    File(image.path).renameSync(newPath);
+    if (File(newPath).existsSync()) {
+      debugPrint("存在!");
+    }
+    if (image != null) {
+      debugPrint(newPath + "888");
+      _handleFileUpload([newPath]);
+    }
+    debugPrint(image.path.toString() + "123");
   }
 
-  void errorAlert(String message) {
-    AlertDialog dialog = AlertDialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(15)),
-      ),
-      content: Row(
-        children: <Widget>[
-          Icon(
-            Icons.cancel_rounded,
-            color: Colors.red,
-            size: 30,
-          ),
-          Padding(padding: EdgeInsets.only(right: 10)),
-          Text(
-            message,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.pop(context, true);
-          },
-          child: Text(
-            "CLOSE",
-            style: TextStyle(color: Colors.black),
-          ),
-        ),
-      ],
-    );
+  Future getVideo({required bool binary}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('binary', binary);
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) => dialog,
+    var video = await imagePicker.getVideo(source: ImageSource.gallery);
+
+    if (video != null) {
+      _handleFileUpload([video.path]);
+    }
+  }
+
+  Future getMultiple({required bool binary}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('binary', binary);
+
+    final files = await FilePicker.platform.pickFiles(
+      allowCompression: false,
+      allowMultiple: true,
     );
+    int count = 0;
+    if (files != null && files.count > 0) {
+      for (var file in files.files) {
+        String dir = path.dirname(file.path.toString());
+        String newPath = path.join(dir, 'work01T-A12345678-'+count.toString()+'.jpg');
+
+        debugPrint('NewPath: ${newPath}');
+        File(file.path.toString()).renameSync(newPath);
+        _handleFileUpload([newPath]);
+      }
+    }
+  }
+
+  void _handleFileUpload(List<String?> paths) async {
+    final prefs = await SharedPreferences.getInstance();
+    final binary = prefs.getBool('binary') ?? false;
+
+    await widget.uploader.enqueue(_buildUpload(
+      binary,
+      paths.whereType<String>().toList(),
+    ));
+
+    widget.onUploadStarted();
+  }
+
+  Upload _buildUpload(bool binary, List<String> paths) {
+    final tag = 'upload';
+
+    var url = widget.uploadURL;
+
+    url = url.replace(queryParameters: {
+      'simulate': _serverBehavior.name,
+    });
+    debugPrint(paths.map((e) => '$e' + '這是測試字串').toString());
+    // if (binary) {
+    //   return RawUpload(
+    //     url: url.toString(),
+    //     path: paths.first,
+    //     method: UploadMethod.POST,
+    //     tag: tag,
+    //   );
+    // } else {
+    return MultipartFormDataUpload(
+      url: url.toString(),
+      data: {'name': 'john'},
+      files: paths
+          .map((e) => FileItem(
+                path: e,
+                field: 'uploaded_file',
+              ))
+          .toList(),
+      method: UploadMethod.POST,
+      tag: tag,
+    );
+    // }
   }
 }
