@@ -53,5 +53,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Flutter requires access to microphone.</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>Flutter requires access to camera.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Save video in gallery</string>
+	<key>FUMaximumConnectionsPerHost</key>
+	<integer>3</integer>
+	<key>FUMaximumUploadOperation</key>
+	<integer>3</integer>
+	<key>FUTimeoutInSeconds</key>
+	<integer>3600</integer>
+	<key>FUAllFilesUploadedMessage</key>
+	<string>All files have been uploaded</string>
 </dict>
 </plist>
