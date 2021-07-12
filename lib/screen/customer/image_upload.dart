@@ -3,13 +3,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:webcam_app/screen/server_behavior.dart';
+import 'package:multi_image_picker2/multi_image_picker2.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({
@@ -99,7 +99,7 @@ class _UploadScreenState extends State<UploadScreen> {
           FlatButton(
             minWidth: size.width * 0.5,
             height: size.height * 0.08,
-            onPressed: () => getMultiple(binary: true),
+            onPressed: () => getImage(binary: true),
             child: Text('上傳文件(多選)',
                 style:
                     TextStyle(color: Colors.blue, fontSize: size.width * 0.06)),
@@ -147,54 +147,21 @@ class _UploadScreenState extends State<UploadScreen> {
     );
   }
 
+  List<Asset> images = <Asset>[];
+
   Future getImage({required bool binary}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('binary', binary);
 
-    var image = await imagePicker.getImage(source: ImageSource.gallery);
-    String dir = path.dirname(image!.path);
-    String newPath = path.join(dir, 'work01T-A12345678-1.jpg');
-
-    debugPrint('NewPath: ${newPath}');
-    File(image.path).renameSync(newPath);
-    if (File(newPath).existsSync()) {
-      debugPrint("存在!");
-    }
-    if (image != null) {
-      debugPrint(newPath + "888");
-      _handleFileUpload([newPath]);
-    }
-    debugPrint(image.path.toString() + "123");
-  }
-
-  Future getVideo({required bool binary}) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('binary', binary);
-
-    var video = await imagePicker.getVideo(source: ImageSource.gallery);
-
-    if (video != null) {
-      _handleFileUpload([video.path]);
-    }
-  }
-
-  Future getMultiple({required bool binary}) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('binary', binary);
-
-    final files = await FilePicker.platform.pickFiles(
-      allowCompression: false,
-      allowMultiple: true,
-    );
-    int count = 0;
-    if (files != null && files.count > 0) {
-      for (var file in files.files) {
-        String dir = path.dirname(file.path.toString());
-        String newPath = path.join(dir, 'work01T-A12345678-'+count.toString()+'.jpg');
-
-        debugPrint('NewPath: ${newPath}');
-        File(file.path.toString()).renameSync(newPath);
+    var images = await imagePicker.getMultiImage();
+    if (images!.isNotEmpty) {
+      for (PickedFile image in images) {
+        String dir = path.dirname(image.path);
+        String newPath = path.join(dir, 'work01T-A12345678-1.jpg');
+        File(image.path).renameSync(newPath);
+        debugPrint(newPath);
         _handleFileUpload([newPath]);
+        debugPrint(image.path.toString());
       }
     }
   }
@@ -219,7 +186,6 @@ class _UploadScreenState extends State<UploadScreen> {
     url = url.replace(queryParameters: {
       'simulate': _serverBehavior.name,
     });
-    debugPrint(paths.map((e) => '$e' + '這是測試字串').toString());
     // if (binary) {
     //   return RawUpload(
     //     url: url.toString(),
