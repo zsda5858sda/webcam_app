@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -73,7 +74,7 @@ class _ClerkPage extends State<ClerkPage> {
                 onWebViewCreated: (controller) {
                   webViewController = controller;
                 },
-                onLoadStart: (controller, url) {
+                onLoadStart: (controller, url) async {
                   setState(() {
                     this.url = url.toString();
                     urlController.text = this.url;
@@ -115,6 +116,32 @@ class _ClerkPage extends State<ClerkPage> {
                     this.url = url.toString();
                     urlController.text = this.url;
                   });
+                  // if (Platform.isIOS && this.url.contains("Svideocall2.html")) {
+                  //   var js =
+                  //       "window.addEventListener('flutterInAppWebViewPlatformReady', function(event) {window.flutter_inappwebview.callHandler('mySum', 12, 2, 50).then(function(result) {console.log(result);});});";
+                  //   var script = UserScript(
+                  //       source: js,
+                  //       injectionTime:
+                  //           UserScriptInjectionTime.AT_DOCUMENT_START);
+                  //   await controller.addUserScript(userScript: script);
+
+                  //   controller.addJavaScriptHandler(
+                  //       handlerName: "mySum",
+                  //       callback: (args) {
+                  //         // Here you receive all the arguments from the JavaScript side
+                  //         // that is a List<dynamic>
+                  //         print("From the JavaScript side:");
+                  //         print(args);
+                  //         return args
+                  //             .reduce((value, element) => value + element);
+                  //       });
+                  // }
+
+                  // if (this.url.contains("Svideocall2.html")) {
+                  //   FlutterScreenRecording.startRecordScreen(
+                  //           DateTime.now().toString())
+                  //       .then((value) => print("start record"));
+                  // }
                 },
                 onLoadError: (controller, url, code, message) {
                   pullToRefreshController.endRefreshing();
@@ -135,9 +162,15 @@ class _ClerkPage extends State<ClerkPage> {
                   });
                 },
                 onConsoleMessage: (controller, consoleMessage) {
-                  print(consoleMessage);
+                  // if (consoleMessage.message.contains("RecordStart")) {
+                  //   print(consoleMessage);
+                  //   FlutterScreenRecording.startRecordScreen(
+                  //           DateTime.now().toString(),
+                  //           titleNotification: '開始錄影')
+                  //       .then((value) => print("screen record start"));
+                  // }
                 },
-              ),
+              ), //
               progress < 1.0
                   ? LinearProgressIndicator(value: progress)
                   : Container(),

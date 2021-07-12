@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/home_screen.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 final Uri uploadURL = Uri.parse(
   'https://vsid.ubt.ubot.com.tw:81/uploadpic',
@@ -70,7 +70,7 @@ void backgroundHandler(BuildContext context) {
 
       final successful = result.status == UploadTaskStatus.complete;
       alert(context);
-      debugPrint(result.status.toString()+'15515');
+      debugPrint(result.status.toString() + '15515');
       var title = 'Upload Complete';
       if (result.status == UploadTaskStatus.failed) {
         title = 'Upload Failed';
@@ -153,7 +153,6 @@ void alert(BuildContext context) {
   //print("in alert()");
 }
 
-Future main() async {
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
 
@@ -186,11 +185,6 @@ Future<void> main() async {
     initializationSettings,
     onSelectNotification: (payload) async {},
   );
-  // FirebaseOptions options = new FirebaseOptions(
-  //     apiKey: 'AIzaSyC9jyLX5g-ToVcrhaS-SPCtp2P3Gqm5b0Q',
-  //     appId: '1:519819102663:android:02b79ac49c3170ed1f31e2',
-  //     messagingSenderId: '519819102663',
-  //     projectId: 'ubot-webcam-app-92061');
 
   await Firebase.initializeApp();
 
