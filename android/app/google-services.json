@@ -1,34 +1,41 @@
 {
   "project_info": {
-    "project_number": "292249661935",
-    "project_id": "ubot-webcam-app",
-    "storage_bucket": "ubot-webcam-app.appspot.com"
+    "project_number": "519819102663",
+    "project_id": "ubot-webcam-app-92061",
+    "storage_bucket": "ubot-webcam-app-92061.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:292249661935:android:ba5608fa4d68756628c61a",
+        "mobilesdk_app_id": "1:519819102663:android:02b79ac49c3170ed1f31e2",
         "android_client_info": {
           "package_name": "com.ubot.webcam_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "292249661935-hg4kjum6t9v4031vdk1u0ssh7uqadv7p.apps.googleusercontent.com",
+          "client_id": "519819102663-46vu9g87620mk9jngla8a8ek03f3v1i0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCEp3rRS6y53p227xb7GqnHBpRII5QDo7Y"
+          "current_key": "AIzaSyC9jyLX5g-ToVcrhaS-SPCtp2P3Gqm5b0Q"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "292249661935-hg4kjum6t9v4031vdk1u0ssh7uqadv7p.apps.googleusercontent.com",
+              "client_id": "519819102663-46vu9g87620mk9jngla8a8ek03f3v1i0.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "519819102663-5fqh8bh4r9l758tme8avvruaggekiak7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ubot.webcam-app"
+              }
             }
           ]
         }
