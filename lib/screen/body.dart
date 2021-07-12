@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/screen/customer/customer_screen.dart';
 import 'package:webcam_app/screen/customer/file_upload.dart';
+import 'package:webcam_app/screen/home_screen.dart';
 import 'clerk/admin_screen.dart';
 import 'component/button.dart';
 
@@ -20,7 +23,7 @@ class Body extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return fileUpload();
+                    return LoginScreen();
                   },
                 ),
               );

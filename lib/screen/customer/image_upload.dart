@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:webcam_app/screen/server_behavior.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({
@@ -146,8 +145,6 @@ class _UploadScreenState extends State<UploadScreen> {
       ),
     );
   }
-
-  List<Asset> images = <Asset>[];
 
   Future getImage({required bool binary}) async {
     final prefs = await SharedPreferences.getInstance();

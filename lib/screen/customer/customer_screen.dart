@@ -41,7 +41,7 @@ class _CustomerScreen extends State<CustomerScreen> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: '請輸入行員ID',
+                    hintText: '請輸入身分證字號',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(
                       const Radius.circular(20.0),
@@ -52,20 +52,39 @@ class _CustomerScreen extends State<CustomerScreen> {
               SizedBox(
                 height: size.height * 0.07,
               ),
-              ScreenButton(
-                btnName: "進行視訊",
-                webView: () async {
-                  dynamic data = [myController.text];
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return CustomerPage(data);
-                      },
-                    ),
-                  );
-                },
-              )
+              Container(
+                width: size.width * 0.8,
+                child: TextField(
+                  controller: myController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: '請輸入電話號碼',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                      const Radius.circular(20.0),
+                    )),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: size.height * 0.07,
+              ),
+              ScreenButton(btnName: '註冊', webView: () {})
+              // ScreenButton(
+              //   btnName: "註冊",
+              //   webView: () async {
+              //     dynamic data = [myController.text];
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) {
+              //           return CustomerPage(data);
+              //         },
+              //       ),
+              //     );
+              //   },
+              // )
             ],
           ),
         ) /* add child content here */,
