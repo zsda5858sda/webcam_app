@@ -11,24 +11,6 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  // static const MethodChannel methodChannel =
-  //     MethodChannel('flutter_screen_recording');
-
-  // String _batteryLevel = 'Battery level: unknown.';
-  // Future<void> _getBatteryLevel() async {
-  //   String batteryLevel;
-  //   try {
-  //     final int? result = await methodChannel.invokeMethod('startRecordScreen');
-  //     batteryLevel = 'Battery level: $result%.';
-  //   } on PlatformException {
-  //     batteryLevel = 'Failed to get battery level.';
-  //   }
-  //   setState(() {
-  //     _batteryLevel = batteryLevel;
-  //     print(_batteryLevel);
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
