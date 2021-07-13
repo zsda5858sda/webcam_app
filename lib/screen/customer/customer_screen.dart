@@ -5,6 +5,7 @@ import 'package:webcam_app/db/users_database.dart';
 import 'package:webcam_app/model/user.dart';
 import 'package:webcam_app/screen/component/br_code_check.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
 
 class CustomerScreen extends StatefulWidget {
   @override
@@ -12,6 +13,10 @@ class CustomerScreen extends StatefulWidget {
 }
 
 class _CustomerScreen extends State<CustomerScreen> {
+  FCMService fcmService = FCMService();
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   final idController = TextEditingController();
   final phoneController = TextEditingController();
 

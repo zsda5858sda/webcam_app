@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ScreenButton extends StatelessWidget {
-  const ScreenButton({
+  ScreenButton({
     Key? key,
     required this.btnName,
-    required this.webView,
+    required this.onPressed,
   }) : super(key: key);
 
   final String btnName;
-  final Function webView;
+  final Function onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class ScreenButton extends StatelessWidget {
                     textStyle: const TextStyle(fontSize: 20),
                   ),
                   onPressed: () {
-                    webView();
+                    onPressed();
                   },
                   child: Text(btnName),
                 ),
