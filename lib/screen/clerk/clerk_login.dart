@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
-import 'package:webcam_app/screen/customer/customer_screen.dart';
+import 'clerk_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class ClerkLoginScreen extends StatelessWidget {
+  const ClerkLoginScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: homeAppBar(context),
-      body: CustomerScreen(),
+      body: ClerkScreen(),
     );
   }
 }
