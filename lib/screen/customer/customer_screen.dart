@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/button.dart';
-import 'package:webcam_app/screen/customer/customer_meet.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
 
 class CustomerScreen extends StatefulWidget {
   @override
@@ -8,7 +9,11 @@ class CustomerScreen extends StatefulWidget {
 }
 
 class _CustomerScreen extends State<CustomerScreen> {
-  final myController = TextEditingController();
+  FCMService fcmService = FCMService();
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -37,7 +42,7 @@ class _CustomerScreen extends State<CustomerScreen> {
               Container(
                 width: size.width * 0.8,
                 child: TextField(
-                  controller: myController,
+                  controller: idController,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -55,7 +60,7 @@ class _CustomerScreen extends State<CustomerScreen> {
               Container(
                 width: size.width * 0.8,
                 child: TextField(
-                  controller: myController,
+                  controller: phoneController,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -70,7 +75,27 @@ class _CustomerScreen extends State<CustomerScreen> {
               SizedBox(
                 height: size.height * 0.07,
               ),
-              ScreenButton(btnName: '註冊', webView: () {})
+              ScreenButton(
+                btnName: "註冊",
+                onPressed: () async {
+                  String id = idController.text;
+                  String phone = phoneController.text;
+                  String token = fcmService.getToken();
+                  CollectionReference users =
+                      FirebaseFirestore.instance.collection('users');
+                  await users
+                      .add({'id': id, 'phone': phone, 'token': token})
+                      .then((value) => print("User Add $value"))
+                      .catchError((e) => print(e));
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text("身分證: $id\n電話: $phone"),
+                        );
+                      });
+                },
+              )
               // ScreenButton(
               //   btnName: "註冊",
               //   webView: () async {

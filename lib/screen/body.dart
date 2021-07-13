@@ -1,15 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/customer/customer_login.dart';
-import 'package:webcam_app/screen/customer/customer_screen.dart';
-import 'package:webcam_app/screen/customer/file_upload.dart';
-import 'package:webcam_app/screen/home_screen.dart';
 import 'clerk/admin_screen.dart';
 import 'component/button.dart';
 
-class Body extends StatelessWidget {
+class Body extends StatefulWidget {
+  const Body({Key? key}) : super(key: key);
+
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
+  // static const MethodChannel methodChannel =
+  //     MethodChannel('flutter_screen_recording');
+
+  // String _batteryLevel = 'Battery level: unknown.';
+  // Future<void> _getBatteryLevel() async {
+  //   String batteryLevel;
+  //   try {
+  //     final int? result = await methodChannel.invokeMethod('startRecordScreen');
+  //     batteryLevel = 'Battery level: $result%.';
+  //   } on PlatformException {
+  //     batteryLevel = 'Failed to get battery level.';
+  //   }
+  //   setState(() {
+  //     _batteryLevel = batteryLevel;
+  //     print(_batteryLevel);
+  //   });
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -18,7 +44,7 @@ class Body extends StatelessWidget {
           ),
           ScreenButton(
             btnName: "客戶登入",
-            webView: () {
+            onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -34,7 +60,7 @@ class Body extends StatelessWidget {
           ),
           ScreenButton(
             btnName: "行員登入",
-            webView: () async {
+            onPressed: () async {
               Navigator.push(
                 context,
                 MaterialPageRoute(
