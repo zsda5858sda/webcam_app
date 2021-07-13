@@ -1,7 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FCMService {
-  String _token = '';
+  String token = '';
 
   FCMService() {
     FirebaseMessaging.instance
@@ -13,10 +13,11 @@ class FCMService {
 
   void setToken(String? token) {
     print('FCM Token: $token');
-    _token = token!;
+    this.token = token!;
   }
 
   String getToken() {
-    return _token;
+    return token;
+  }
   }
 }

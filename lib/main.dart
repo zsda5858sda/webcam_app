@@ -38,24 +38,6 @@ Future<void> main() async {
   await Permission.storage.request();
 
   _uploader.setBackgroundHandler(backgroundHandler);
-
-  var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  var initializationSettingsAndroid =
-      AndroidInitializationSettings('ic_upload');
-  var initializationSettingsIOS = IOSInitializationSettings(
-    requestSoundPermission: false,
-    requestBadgePermission: false,
-    requestAlertPermission: true,
-    onDidReceiveLocalNotification:
-        (int id, String? title, String? body, String? payload) async {},
-  );
-  var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-  flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onSelectNotification: (payload) async {},
-  );
-
   await Firebase.initializeApp();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -103,33 +85,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    super.initState();
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      if (notification != null && android != null && !kIsWeb) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                // TODO add a proper drawable resource to android, for now using
-                //      one that already exists in example app.
-                icon: 'launch_background',
-              ),
-            ));
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    startListenMessage();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: '視訊系統',
@@ -279,4 +237,33 @@ void alert(BuildContext context) {
   );
 
   //print("in alert()");
+}
+
+void startListenMessage() {
+// 監聽消息
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channel.description,
+              // TODO add a proper drawable resource to android, for now using
+              //      one that already exists in example app.
+              icon: 'launch_background',
+            ),
+          ));
+    }
+  });
+
+  // 背景監聽消息
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print("在背景執行時收到訊息");
+  });
 }

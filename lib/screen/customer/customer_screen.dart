@@ -81,12 +81,10 @@ class _CustomerScreen extends State<CustomerScreen> {
                   String id = idController.text;
                   String phone = phoneController.text;
                   String token = fcmService.getToken();
-                  CollectionReference users =
-                      FirebaseFirestore.instance.collection('users');
-                  await users
-                      .add({'id': id, 'phone': phone, 'token': token})
-                      .then((value) => print("User Add $value"))
-                      .catchError((e) => print(e));
+                  DocumentReference<Map<String, dynamic>> users =
+                      FirebaseFirestore.instance.collection('users').doc(phone);
+                  users.set({"token": token});
+
                   showDialog(
                       context: context,
                       builder: (context) {
