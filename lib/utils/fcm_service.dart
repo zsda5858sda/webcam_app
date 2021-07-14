@@ -19,5 +19,4 @@ class FCMService {
   String getToken() {
     return token;
   }
-  }
 }

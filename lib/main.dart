@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webcam_app/screen/customer/customer_login.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 
@@ -86,12 +87,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    startListenMessage();
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: '視訊系統',
-      home: HomeScreen(),
+      home: HomeScreen(
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        channel: channel,
+      ),
+      routes: {'/customer': (content) => LoginScreen()},
     );
   }
 }
@@ -237,33 +240,4 @@ void alert(BuildContext context) {
   );
 
   //print("in alert()");
-}
-
-void startListenMessage() {
-// 監聽消息
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
-    if (notification != null && android != null && !kIsWeb) {
-      flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channel.description,
-              // TODO add a proper drawable resource to android, for now using
-              //      one that already exists in example app.
-              icon: 'launch_background',
-            ),
-          ));
-    }
-  });
-
-  // 背景監聽消息
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("在背景執行時收到訊息");
-  });
 }
