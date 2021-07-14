@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
+import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class CustomerScreen extends StatefulWidget {
   @override
@@ -11,11 +13,18 @@ class CustomerScreen extends StatefulWidget {
 }
 
 class _CustomerScreen extends State<CustomerScreen> {
-  FCMService fcmService = FCMService();
   final TextEditingController idController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final hbCodeController = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   Size size = ResponsiveApp().mq.size;
+
+  String code = '';
+  @override
+  void initState() {
+    super.initState();
+    code = getCode();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +95,9 @@ class _CustomerScreen extends State<CustomerScreen> {
                 ScreenButton(
                     btnName: '註冊',
                     onPressed: () async {
+                      if (code == hbCodeController.text) {
+                      } else {
+                        showAlertDialog(context, "", "驗證碼錯誤");
                       }
                     })
               ],
@@ -102,5 +114,11 @@ class _CustomerScreen extends State<CustomerScreen> {
       phone: phoneController.text,
     );
     await UserDatabase.instance.create(user);
+  String getCode() {
+    String code = "";
+    for (var i = 0; i < 6; i++) {
+      code = code + Random().nextInt(9).toString();
+    }
+    return code;
   }
 }

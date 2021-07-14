@@ -1,7 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/clerk/message_screen.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class ClerkScreen extends StatefulWidget {
   @override
@@ -11,8 +13,15 @@ class ClerkScreen extends StatefulWidget {
 class _ClerkScreen extends State<ClerkScreen> {
   final idController = TextEditingController();
   final phoneController = TextEditingController();
+  final hbCodeController = TextEditingController();
   Size size = ResponsiveApp().mq.size;
 
+  String code = '';
+  @override
+  void initState() {
+    super.initState();
+    code = getCode();
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -81,15 +90,11 @@ class _ClerkScreen extends State<ClerkScreen> {
                   ),
                   ScreenButton(
                       btnName: '登入',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return MessageScreen();
-                            },
-                          ),
-                        );
+                      onPressed: () async {
+                        if (code == hbCodeController.text) {
+                        } else {
+                          showAlertDialog(context, "", "驗證碼錯誤");
+                        }
                       })
                 ],
               ),
@@ -100,11 +105,11 @@ class _ClerkScreen extends State<ClerkScreen> {
     );
   }
 
-  Future addUser() async {
-    final user = User(
-      id: idController.text,
-      phone: phoneController.text,
-    );
-    await UserDatabase.instance.create(user);
+  String getCode() {
+    String _code = "";
+    for (var i = 0; i < 6; i++) {
+      _code = _code + Random().nextInt(9).toString();
+    }
+    return _code;
   }
 }
