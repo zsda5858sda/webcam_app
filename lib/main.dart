@@ -9,27 +9,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/customer/customer_login.dart';
 import 'package:webcam_app/screen/home_screen.dart';
-import 'package:webcam_app/utils/fcm_service.dart';
 
 final Uri uploadURL = Uri.parse(
   'https://vsid.ubt.ubot.com.tw:81/uploadpic',
 );
 FlutterUploader _uploader = FlutterUploader();
 
-FCMService fcmService = FCMService();
-
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
-
-/// Requires that a Firestore emulator is running locally.
-/// See https://firebase.flutter.dev/docs/firestore/usage#emulator-usage
-// bool USE_FIRESTORE_EMULATOR = false;
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -42,10 +35,6 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // if (USE_FIRESTORE_EMULATOR) {
-  //   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
-  // }
 
   if (!kIsWeb) {
     channel = const AndroidNotificationChannel(
@@ -79,12 +68,9 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -94,7 +80,10 @@ class _MyAppState extends State<MyApp> {
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
         channel: channel,
       ),
-      routes: {'/customer': (content) => LoginScreen()},
+      routes: {
+        '/customer': (context) => CustomerLoginScreen(),
+        '/clerk': (context) => ClerkLoginScreen()
+      },
     );
   }
 }
