@@ -1,8 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/clerk/message_screen.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/login.dart';
+import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class ClerkScreen extends StatefulWidget {
@@ -12,7 +15,7 @@ class ClerkScreen extends StatefulWidget {
 
 class _ClerkScreen extends State<ClerkScreen> {
   final idController = TextEditingController();
-  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
   final hbCodeController = TextEditingController();
   Size size = ResponsiveApp().mq.size;
 
@@ -22,6 +25,7 @@ class _ClerkScreen extends State<ClerkScreen> {
     super.initState();
     code = getCode();
   }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -92,6 +96,19 @@ class _ClerkScreen extends State<ClerkScreen> {
                       btnName: '登入',
                       onPressed: () async {
                         if (code == hbCodeController.text) {
+                          await login(
+                                  idController.text, passwordController.text)
+                              .then((_) => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return MessageScreen();
+                                      },
+                                    ),
+                                  ))
+                              .catchError((error) {
+                            showAlertDialog(context, "登入失敗", "帳號或密碼錯誤");
+                          });
                         } else {
                           showAlertDialog(context, "", "驗證碼錯誤");
                         }
