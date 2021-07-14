@@ -52,7 +52,10 @@ class _MessagePushingState extends State<MessagePushing> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  ScreenButton(btnName: '發送推波', onPressed: () {}),
+                  ScreenButton(
+                      btnName: '發送推播',
+                      onPressed: () async {
+                      }),
                   SizedBox(
                     height: size.height * 0.07,
                   ),

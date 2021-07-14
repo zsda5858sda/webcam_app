@@ -1,10 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:webcam_app/db/users_database.dart';
-import 'package:webcam_app/model/user.dart';
-import 'package:webcam_app/screen/component/br_code_check.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 
 class CustomerScreen extends StatefulWidget {
@@ -17,10 +15,10 @@ class _CustomerScreen extends State<CustomerScreen> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  Size size = ResponsiveApp().mq.size;
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Wrap(
       spacing: 4.0,
       runSpacing: 8.0,
@@ -77,13 +75,18 @@ class _CustomerScreen extends State<CustomerScreen> {
                 SizedBox(
                   height: size.height * 0.07,
                 ),
-                BrCodeCheck(size: size, phoneController: phoneController),
+                HBCodeWidget(
+                  size: size,
+                  hbCodeController: hbCodeController,
+                  code: code,
+                ),
                 SizedBox(
                   height: size.height * 0.07,
                 ),
                 ScreenButton(
                     btnName: '註冊',
-                    onPressed: () {
+                    onPressed: () async {
+                      }
                     })
               ],
             ),

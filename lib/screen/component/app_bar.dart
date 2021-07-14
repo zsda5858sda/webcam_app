@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:webcam_app/utils/response_app.dart';
 
-AppBar homeAppBar(BuildContext context) {
-  Size size = MediaQuery.of(context).size;
+AppBar homeAppBar() {
+  Size size = ResponsiveApp().mq.size;
   return AppBar(
     backgroundColor: Colors.white,
     elevation: 0,

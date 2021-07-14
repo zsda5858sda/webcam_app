@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webcam_app/db/users_database.dart';
-import 'package:webcam_app/model/user.dart';
 import 'package:webcam_app/screen/clerk/message_screen.dart';
-import 'package:webcam_app/screen/component/br_code_check.dart';
+import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/component/button.dart';
 
 class ClerkScreen extends StatefulWidget {
@@ -13,10 +11,10 @@ class ClerkScreen extends StatefulWidget {
 class _ClerkScreen extends State<ClerkScreen> {
   final idController = TextEditingController();
   final phoneController = TextEditingController();
+  Size size = ResponsiveApp().mq.size;
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -57,7 +55,8 @@ class _ClerkScreen extends State<ClerkScreen> {
                   Container(
                     width: size.width * 0.8,
                     child: TextField(
-                      controller: phoneController,
+                      obscureText: true,
+                      controller: passwordController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -72,7 +71,11 @@ class _ClerkScreen extends State<ClerkScreen> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  BrCodeCheck(size: size, phoneController: phoneController),
+                  HBCodeWidget(
+                    size: size,
+                    hbCodeController: hbCodeController,
+                    code: code,
+                  ),
                   SizedBox(
                     height: size.height * 0.07,
                   ),

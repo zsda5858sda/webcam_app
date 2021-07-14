@@ -9,7 +9,7 @@ class MessageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: homeAppBar(context),
+      appBar: homeAppBar(),
       body: MessagePushing(),
     );
   }
