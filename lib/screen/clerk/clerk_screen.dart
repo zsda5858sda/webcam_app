@@ -78,7 +78,7 @@ class _ClerkScreen extends State<ClerkScreen> {
                   ),
                   ScreenButton(
                       btnName: '登入',
-                      webView: () {
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(

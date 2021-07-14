@@ -17,8 +17,6 @@ class _CustomerScreen extends State<CustomerScreen> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final idController = TextEditingController();
-  final phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +83,7 @@ class _CustomerScreen extends State<CustomerScreen> {
                 ),
                 ScreenButton(
                     btnName: '註冊',
-                    webView: () async {
-                      addUser();
+                    onPressed: () {
                     })
               ],
             ),
