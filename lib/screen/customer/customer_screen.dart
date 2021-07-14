@@ -1,6 +1,11 @@
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:webcam_app/database/dao/user.dart';
+import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
@@ -96,6 +101,11 @@ class _CustomerScreen extends State<CustomerScreen> {
                     btnName: '註冊',
                     onPressed: () async {
                       if (code == hbCodeController.text) {
+                        String id = idController.text;
+                        String phone = phoneController.text;
+                        String? token = await FCMService.getToken();
+                        addUserToFirestore(phone, token);
+                        addUserToLocalDB(id, phone);
                       } else {
                         showAlertDialog(context, "", "驗證碼錯誤");
                       }
@@ -108,12 +118,20 @@ class _CustomerScreen extends State<CustomerScreen> {
     );
   }
 
-  Future addUser() async {
+  void addUserToLocalDB(id, phone) {
     final user = User(
-      id: idController.text,
-      phone: phoneController.text,
+      id: id,
+      phone: phone,
     );
-    await UserDatabase.instance.create(user);
+    UserDao.instance.create(user);
+  }
+
+  void addUserToFirestore(phone, token) {
+    DocumentReference<Map<String, dynamic>> users =
+        FirebaseFirestore.instance.collection('users').doc(phone);
+    users.set({"token": token});
+  }
+
   String getCode() {
     String code = "";
     for (var i = 0; i < 6; i++) {

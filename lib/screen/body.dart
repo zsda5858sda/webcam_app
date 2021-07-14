@@ -2,8 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:webcam_app/screen/clerk/clerk_login.dart';
-import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/database/dao/user.dart';
+import 'package:webcam_app/database/model/user.dart';
 import 'component/button.dart';
 
 class Body extends StatelessWidget {
@@ -50,15 +50,13 @@ class Body extends StatelessWidget {
           ),
           ScreenButton(
             btnName: "客戶登入",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return LoginScreen();
-                  },
-                ),
-              );
+            onPressed: () async {
+              List<User> userList = await UserDao.instance.readAllNotes();
+              if (userList.length > 0) {
+                print('客戶已註冊');
+              } else {
+                Navigator.pushNamed(context, '/customer');
+              }
             },
           ),
           SizedBox(
@@ -66,16 +64,7 @@ class Body extends StatelessWidget {
           ),
           ScreenButton(
             btnName: "行員登入",
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return ClerkLoginScreen();
-                  },
-                ),
-              );
-            },
+            onPressed: () => Navigator.pushNamed(context, '/clerk'),
           ),
         ],
       ),
