@@ -1,13 +1,13 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:webcam_app/model/user.dart';
+import 'package:webcam_app/database/model/user.dart';
 
-class UserDatabase {
-  static final UserDatabase instance = UserDatabase._init();
+class UserDao {
+  static final UserDao instance = UserDao._init();
 
   static Database? _database;
 
-  UserDatabase._init();
+  UserDao._init();
 
   Future<Database> get database async {
     if (_database != null) {
