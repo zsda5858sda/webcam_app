@@ -11,11 +11,11 @@ class UserFields {
 }
 
 class User {
-  final String? id;
+  final String id;
   final String phone;
 
   const User({
-    this.id,
+    required this.id,
     required this.phone,
   });
 
@@ -28,12 +28,12 @@ class User {
         phone: phone ?? this.phone,
       );
 
-  static User fromJson(Map<String, Object?> json) => User(
-        id: json[UserFields.id] as String?,
+  static User fromJson(Map<String, Object> json) => User(
+        id: json[UserFields.id] as String,
         phone: json[UserFields.phone] as String,
       );
 
-  Map<String, Object?> toJson() => {
+  Map<String, Object> toJson() => {
         UserFields.id: id,
         UserFields.phone: phone,
       };

@@ -43,34 +43,34 @@ CREATE TABLE $tableUser (
     return user.copy(id: id.toString());
   }
 
-  Future readUserById(String id) async {
-    final db = await instance.database;
+  // Future readUserById(String id) async {
+  //   final db = await instance.database;
 
-    final maps = await db.query(
-      tableUser,
-      columns: UserFields.values,
-      where: '${UserFields.id} = ?',
-      whereArgs: [id],
-    );
+  //   final maps = await db.query(
+  //     tableUser,
+  //     columns: UserFields.values,
+  //     where: '${UserFields.id} = ?',
+  //     whereArgs: [id],
+  //   );
 
-    if (maps.isNotEmpty) {
-      return User.fromJson(maps.first);
-    } else {
-      throw Exception('ID $id not found');
-    }
-  }
+  //   if (maps.isNotEmpty) {
+  //     return User.fromJson(maps.first);
+  //   } else {
+  //     throw Exception('ID $id not found');
+  //   }
+  // }
 
-  Future<List<User>> readAllNotes() async {
-    final db = await instance.database;
+  // Future<List<User>> readAllNotes() async {
+  //   final db = await instance.database;
 
-    final orderBy = '${UserFields.id} ASC';
-    // final result =
-    //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
+  //   final orderBy = '${UserFields.id} ASC';
+  //   // final result =
+  //   //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
 
-    final result = await db.query(tableUser, orderBy: orderBy);
+  //   final result = await db.query(tableUser, orderBy: orderBy);
 
-    return result.map((json) => User.fromJson(json)).toList();
-  }
+  //   return result.map((json) => User.fromJson(json)).toList();
+  // }
 
   // Future readUserByPhone(String phone) async {
   //   final db = await instance.database;

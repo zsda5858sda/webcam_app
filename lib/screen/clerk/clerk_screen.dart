@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hb_check_code/hb_check_code.dart';
+import 'package:random_string/random_string.dart';
 import 'package:webcam_app/db/users_database.dart';
 import 'package:webcam_app/model/user.dart';
 import 'package:webcam_app/screen/clerk/message_screen.dart';
@@ -13,6 +15,7 @@ class ClerkScreen extends StatefulWidget {
 class _ClerkScreen extends State<ClerkScreen> {
   final idController = TextEditingController();
   final phoneController = TextEditingController();
+  final code = randomAlpha(5);
 
   @override
   Widget build(BuildContext context) {
@@ -72,21 +75,42 @@ class _ClerkScreen extends State<ClerkScreen> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  BrCodeCheck(size: size, phoneController: phoneController),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        child: HBCheckCode(
+                          backgroundColor: Color(0xFFCCEEF7),
+                          code: code,
+                          dotCount: 20,
+                          width: size.width * 0.3,
+                          height: size.height * 0.06,
+                        ),
+                      ),
+                      Container(
+                        width: size.width * 0.3,
+                        height: size.height * 0.06,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: '請輸入驗證碼',
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                              const Radius.circular(0),
+                            )),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   SizedBox(
                     height: size.height * 0.07,
                   ),
                   ScreenButton(
                       btnName: '登入',
-                      webView: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return MessageScreen();
-                            },
-                          ),
-                        );
+                      onPressed: () async {
+                        addUser();
                       })
                 ],
               ),

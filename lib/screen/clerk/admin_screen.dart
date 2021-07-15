@@ -24,7 +24,7 @@ class _ClerkPage extends State<ClerkPage> {
         allowsInlineMediaPlayback: true,
       ));
 
-  late PullToRefreshController pullToRefreshController;
+  PullToRefreshController? pullToRefreshController;
   String url = "";
   double progress = 0;
   final urlController = TextEditingController();
@@ -86,7 +86,7 @@ class _ClerkPage extends State<ClerkPage> {
                       action: PermissionRequestResponseAction.GRANT);
                 },
                 shouldOverrideUrlLoading: (controller, navigationAction) async {
-                  var uri = navigationAction.request.url!;
+                  var uri = navigationAction.request.url;
 
                   if (![
                     "http",
@@ -96,7 +96,7 @@ class _ClerkPage extends State<ClerkPage> {
                     "data",
                     "javascript",
                     "about"
-                  ].contains(uri.scheme)) {
+                  ].contains(uri!.scheme)) {
                     if (await canLaunch(url)) {
                       // Launch the App
                       await launch(
@@ -110,7 +110,7 @@ class _ClerkPage extends State<ClerkPage> {
                   return NavigationActionPolicy.ALLOW;
                 },
                 onLoadStop: (controller, url) async {
-                  pullToRefreshController.endRefreshing();
+                  pullToRefreshController!.endRefreshing();
                   setState(() {
                     this.url = url.toString();
                     urlController.text = this.url;
@@ -143,11 +143,11 @@ class _ClerkPage extends State<ClerkPage> {
                   // }
                 },
                 onLoadError: (controller, url, code, message) {
-                  pullToRefreshController.endRefreshing();
+                  pullToRefreshController!.endRefreshing();
                 },
                 onProgressChanged: (controller, progress) {
                   if (progress == 100) {
-                    pullToRefreshController.endRefreshing();
+                    pullToRefreshController!.endRefreshing();
                   }
                   setState(() {
                     this.progress = progress / 100;

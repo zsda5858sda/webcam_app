@@ -52,11 +52,11 @@ class _MessagePushingState extends State<MessagePushing> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  ScreenButton(btnName: '發送推波', webView: () {}),
+                  ScreenButton(btnName: '發送推波', onPressed: () {}),
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  ScreenButton(btnName: '進行視訊', webView: () {})
+                  ScreenButton(btnName: '進行視訊', onPressed: () {})
                 ],
               ),
             ),

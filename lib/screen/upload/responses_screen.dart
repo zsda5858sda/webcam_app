@@ -4,8 +4,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
-import 'package:webcam_app/screen/upload_item.dart';
-import 'package:webcam_app/screen/upload_item_view.dart';
+import 'package:webcam_app/screen/upload/upload_item.dart';
+import 'package:webcam_app/screen/upload/upload_item_view.dart';
 
 /// Shows the statusresponses for previous uploads.
 class ResponsesScreen extends StatefulWidget {

@@ -14,11 +14,9 @@ class CustomerScreen extends StatefulWidget {
 
 class _CustomerScreen extends State<CustomerScreen> {
   FCMService fcmService = FCMService();
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
   final idController = TextEditingController();
   final phoneController = TextEditingController();
+  // FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +44,6 @@ class _CustomerScreen extends State<CustomerScreen> {
                 Container(
                   width: size.width * 0.8,
                   child: TextField(
-                    controller: idController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
@@ -64,7 +61,6 @@ class _CustomerScreen extends State<CustomerScreen> {
                 Container(
                   width: size.width * 0.8,
                   child: TextField(
-                    controller: phoneController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
@@ -85,7 +81,7 @@ class _CustomerScreen extends State<CustomerScreen> {
                 ),
                 ScreenButton(
                     btnName: '註冊',
-                    webView: () async {
+                    onPressed: () async {
                       addUser();
                     })
               ],

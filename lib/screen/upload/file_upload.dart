@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:webcam_app/screen/responses_screen.dart';
+import 'package:webcam_app/screen/component/app_bar.dart';
+import 'package:webcam_app/screen/upload/responses_screen.dart';
 
 import 'image_upload.dart';
 
@@ -129,8 +130,8 @@ class _fileUpload extends State<fileUpload> {
       requestSoundPermission: false,
       requestBadgePermission: false,
       requestAlertPermission: true,
-      onDidReceiveLocalNotification:
-          (int id, String? title, String? body, String? payload) async {},
+      // onDidReceiveLocalNotification:
+      //     (int id, String title, String body, String payload) async {},
     );
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
@@ -145,16 +146,16 @@ class _fileUpload extends State<fileUpload> {
     return Scaffold(
       backgroundColor: Color(0xFF63BED0),
       body: _currentIndex == 0
-            ? UploadScreen(
-                uploader: _uploader,
-                uploadURL: uploadURL,
-                onUploadStarted: () {
-                  setState(() => _currentIndex = 1);
-                },
-              )
-            : ResponsesScreen(
-                uploader: _uploader,
-              ),
+          ? UploadScreen(
+              uploader: _uploader,
+              uploadURL: uploadURL,
+              onUploadStarted: () {
+                setState(() => _currentIndex = 1);
+              },
+            )
+          : ResponsesScreen(
+              uploader: _uploader,
+            ),
     );
   }
 }

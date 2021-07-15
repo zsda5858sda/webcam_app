@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:random_string/random_string.dart';
 import 'package:hb_check_code/hb_check_code.dart';
-import 'package:webcam_app/screen/customer/customer_screen.dart';
 
 class BrCodeCheck extends StatelessWidget {
   const BrCodeCheck({
@@ -16,10 +16,7 @@ class BrCodeCheck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String code = "";
-    for (var i = 0; i < 6; i++) {
-      code = code + Random().nextInt(9).toString();
-    }
+    final String code = randomAlpha(5);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -36,7 +33,6 @@ class BrCodeCheck extends StatelessWidget {
           width: size.width * 0.3,
           height: size.height * 0.06,
           child: TextField(
-            controller: phoneController,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

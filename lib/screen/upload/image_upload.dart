@@ -163,7 +163,7 @@ class _UploadScreenState extends State<UploadScreen> {
     }
   }
 
-  void _handleFileUpload(List<String?> paths) async {
+  void _handleFileUpload(List<String> paths) async {
     final prefs = await SharedPreferences.getInstance();
     final binary = prefs.getBool('binary') ?? false;
 
@@ -180,9 +180,6 @@ class _UploadScreenState extends State<UploadScreen> {
 
     var url = widget.uploadURL;
 
-    url = url.replace(queryParameters: {
-      'simulate': _serverBehavior.name,
-    });
     // if (binary) {
     //   return RawUpload(
     //     url: url.toString(),
