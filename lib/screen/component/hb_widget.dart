@@ -1,22 +1,25 @@
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:hb_check_code/hb_check_code.dart';
 
-class BrCodeCheck extends StatelessWidget {
-  const BrCodeCheck({
+class HBCodeWidget extends StatelessWidget {
+  const HBCodeWidget({
     Key? key,
     required this.size,
-    required this.phoneController,
+    required this.hbCodeController, 
+    required this.code,
   }) : super(key: key);
 
   final Size size;
-  final TextEditingController phoneController;
+  final TextEditingController hbCodeController;
+  final String code;
 
   @override
   Widget build(BuildContext context) {
-    final String code = randomAlpha(5);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -33,6 +36,7 @@ class BrCodeCheck extends StatelessWidget {
           width: size.width * 0.3,
           height: size.height * 0.06,
           child: TextField(
+            controller: hbCodeController,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

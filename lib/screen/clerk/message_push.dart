@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessagePushing extends StatefulWidget {
   const MessagePushing({Key? key}) : super(key: key);
@@ -8,7 +10,6 @@ class MessagePushing extends StatefulWidget {
   _MessagePushingState createState() => _MessagePushingState();
 }
 
-final idController = TextEditingController();
 final phoneController = TextEditingController();
 
 class _MessagePushingState extends State<MessagePushing> {
@@ -37,7 +38,7 @@ class _MessagePushingState extends State<MessagePushing> {
                   Container(
                     width: size.width * 0.8,
                     child: TextField(
-                      controller: idController,
+                      controller: phoneController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -52,7 +53,24 @@ class _MessagePushingState extends State<MessagePushing> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  ScreenButton(btnName: '發送推波', onPressed: () {}),
+                  ScreenButton(
+                      btnName: '發送推播',
+                      onPressed: () async {
+                        String token = '';
+                        String phone = phoneController.text;
+                        final DocumentReference document = FirebaseFirestore
+                            .instance
+                            .collection("users")
+                            .doc(phone);
+                        await document
+                            .get()
+                            .then<dynamic>((DocumentSnapshot snapshot) async {
+                          Map<String, dynamic> data =
+                              snapshot.data() as Map<String, dynamic>;
+                          token = data['token'];
+                        });
+                        FCMService.sendToCustomer(token);
+                      }),
                   SizedBox(
                     height: size.height * 0.07,
                   ),

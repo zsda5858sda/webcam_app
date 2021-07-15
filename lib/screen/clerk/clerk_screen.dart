@@ -1,11 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:hb_check_code/hb_check_code.dart';
-import 'package:random_string/random_string.dart';
-import 'package:webcam_app/db/users_database.dart';
-import 'package:webcam_app/model/user.dart';
 import 'package:webcam_app/screen/clerk/message_screen.dart';
-import 'package:webcam_app/screen/component/br_code_check.dart';
+import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/login.dart';
+import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class ClerkScreen extends StatefulWidget {
   @override
@@ -14,12 +15,19 @@ class ClerkScreen extends StatefulWidget {
 
 class _ClerkScreen extends State<ClerkScreen> {
   final idController = TextEditingController();
-  final phoneController = TextEditingController();
-  final code = randomAlpha(5);
+  final passwordController = TextEditingController();
+  final hbCodeController = TextEditingController();
+  Size size = ResponsiveApp().mq.size;
+
+  String code = '';
+  @override
+  void initState() {
+    super.initState();
+    code = getCode();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -60,7 +68,8 @@ class _ClerkScreen extends State<ClerkScreen> {
                   Container(
                     width: size.width * 0.8,
                     child: TextField(
-                      controller: phoneController,
+                      obscureText: true,
+                      controller: passwordController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -75,34 +84,10 @@ class _ClerkScreen extends State<ClerkScreen> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        child: HBCheckCode(
-                          backgroundColor: Color(0xFFCCEEF7),
-                          code: code,
-                          dotCount: 20,
-                          width: size.width * 0.3,
-                          height: size.height * 0.06,
-                        ),
-                      ),
-                      Container(
-                        width: size.width * 0.3,
-                        height: size.height * 0.06,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: '請輸入驗證碼',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                              const Radius.circular(0),
-                            )),
-                          ),
-                        ),
-                      ),
-                    ],
+                  HBCodeWidget(
+                    size: size,
+                    hbCodeController: hbCodeController,
+                    code: code,
                   ),
                   SizedBox(
                     height: size.height * 0.07,
@@ -110,7 +95,23 @@ class _ClerkScreen extends State<ClerkScreen> {
                   ScreenButton(
                       btnName: '登入',
                       onPressed: () async {
-                        addUser();
+                        if (code == hbCodeController.text) {
+                          await login(
+                                  idController.text, passwordController.text)
+                              .then((_) => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return MessageScreen();
+                                      },
+                                    ),
+                                  ))
+                              .catchError((error) {
+                            showAlertDialog(context, "登入失敗", "帳號或密碼錯誤");
+                          });
+                        } else {
+                          showAlertDialog(context, "", "驗證碼錯誤");
+                        }
                       })
                 ],
               ),
@@ -121,11 +122,11 @@ class _ClerkScreen extends State<ClerkScreen> {
     );
   }
 
-  Future addUser() async {
-    final user = User(
-      id: idController.text,
-      phone: phoneController.text,
-    );
-    await UserDatabase.instance.create(user);
+  String getCode() {
+    String _code = "";
+    for (var i = 0; i < 6; i++) {
+      _code = _code + Random().nextInt(9).toString();
+    }
+    return _code;
   }
 }
