@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CustomerPage extends StatefulWidget {
-  dynamic data;
-  CustomerPage(this.data);
+class ClerkPage extends StatefulWidget {
+  const ClerkPage({Key? key, required this.agentId}) : super(key: key);
+
+  final String agentId;
   @override
-  _CustomerPage createState() => new _CustomerPage();
+  _ClerkPage createState() => new _ClerkPage();
 }
 
-class _CustomerPage extends State<CustomerPage> {
+class _ClerkPage extends State<ClerkPage> {
   final GlobalKey webViewKey = GlobalKey();
 
   InAppWebViewController? webViewController;
@@ -26,8 +27,8 @@ class _CustomerPage extends State<CustomerPage> {
         allowsInlineMediaPlayback: true,
       ));
 
-  PullToRefreshController? pullToRefreshController;
-  String url = "";
+  late PullToRefreshController pullToRefreshController;
+  String url = "https://vsid.ubt.ubot.com.tw:81/main/Svideocall2.html?agentid=";
   double progress = 0;
   final urlController = TextEditingController();
 
@@ -57,10 +58,6 @@ class _CustomerPage extends State<CustomerPage> {
 
   @override
   Widget build(BuildContext context) {
-    String url =
-        "https://vsid.ubt.ubot.com.tw:81/main/client/index.html?openExternalBrowser=1&agentid=";
-    String agentId = widget.data[0].toString();
-    String finalUrl = url + agentId;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -71,13 +68,13 @@ class _CustomerPage extends State<CustomerPage> {
             children: [
               InAppWebView(
                 key: webViewKey,
-                initialUrlRequest: URLRequest(url: Uri.parse(finalUrl)),
+                initialUrlRequest: URLRequest(url: Uri.parse(url)),
                 initialOptions: options,
                 pullToRefreshController: pullToRefreshController,
                 onWebViewCreated: (controller) {
                   webViewController = controller;
                 },
-                onLoadStart: (controller, url) {
+                onLoadStart: (controller, url) async {
                   setState(() {
                     this.url = url.toString();
                     urlController.text = this.url;
@@ -90,7 +87,7 @@ class _CustomerPage extends State<CustomerPage> {
                       action: PermissionRequestResponseAction.GRANT);
                 },
                 shouldOverrideUrlLoading: (controller, navigationAction) async {
-                  var uri = navigationAction.request.url;
+                  var uri = navigationAction.request.url!;
 
                   if (![
                     "http",
@@ -100,7 +97,7 @@ class _CustomerPage extends State<CustomerPage> {
                     "data",
                     "javascript",
                     "about"
-                  ].contains(uri!.scheme)) {
+                  ].contains(uri.scheme)) {
                     if (await canLaunch(url)) {
                       // Launch the App
                       await launch(
@@ -114,18 +111,18 @@ class _CustomerPage extends State<CustomerPage> {
                   return NavigationActionPolicy.ALLOW;
                 },
                 onLoadStop: (controller, url) async {
-                  pullToRefreshController!.endRefreshing();
+                  pullToRefreshController.endRefreshing();
                   setState(() {
                     this.url = url.toString();
                     urlController.text = this.url;
                   });
                 },
                 onLoadError: (controller, url, code, message) {
-                  pullToRefreshController!.endRefreshing();
+                  pullToRefreshController.endRefreshing();
                 },
                 onProgressChanged: (controller, progress) {
                   if (progress == 100) {
-                    pullToRefreshController!.endRefreshing();
+                    pullToRefreshController.endRefreshing();
                   }
                   setState(() {
                     this.progress = progress / 100;
@@ -138,10 +135,8 @@ class _CustomerPage extends State<CustomerPage> {
                     urlController.text = this.url;
                   });
                 },
-                onConsoleMessage: (controller, consoleMessage) {
-                  print(consoleMessage);
-                },
-              ),
+                onConsoleMessage: (controller, consoleMessage) {},
+              ), //
               progress < 1.0
                   ? LinearProgressIndicator(value: progress)
                   : Container(),

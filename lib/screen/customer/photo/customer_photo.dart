@@ -7,7 +7,7 @@ import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
-import 'package:webcam_app/screen/customer/photo_taking.dart';
+import 'package:webcam_app/screen/customer/photo/body.dart';
 
 const String title = 'FileUpload Sample app';
 final Uri uploadURL = Uri.parse(
@@ -105,16 +105,14 @@ void backgroundHandler() {
   });
 }
 
-class PhotoScreen extends StatefulWidget {
-  PhotoScreen({Key? key}) : super(key: key);
-
+class CustomerPhotoScreen extends StatefulWidget {
+  CustomerPhotoScreen({Key? key}) : super(key: key);
+  static const String routeName = "/photo";
   @override
-  _PhotoScreen createState() => _PhotoScreen();
+  _CustomerPhotoScreen createState() => _CustomerPhotoScreen();
 }
 
-class _PhotoScreen extends State<PhotoScreen> {
-  int _currentIndex = 0;
-
+class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
   @override
   void initState() {
     super.initState();
@@ -142,15 +140,13 @@ class _PhotoScreen extends State<PhotoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: homeAppBar(context),
+        appBar: homeAppBar(),
         backgroundColor: Color(0xFF63BED0),
-        body: CustomCameraPage(
+        body: Body(
           uploadURL: uploadURL,
           uploader: _uploader,
           onUploadStarted: () {
-            setState(() {
-              _currentIndex = 1;
-            });
+            setState(() {});
             debugPrint(_uploader.result.toString());
           },
         ));

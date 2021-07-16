@@ -12,8 +12,8 @@ var hintText;
 var hintContent;
 var photoState = 1;
 
-class CustomCameraPage extends StatefulWidget {
-  const CustomCameraPage({
+class Body extends StatefulWidget {
+  const Body({
     Key? key,
     required this.uploader,
     required this.uploadURL,
@@ -24,16 +24,15 @@ class CustomCameraPage extends StatefulWidget {
   final VoidCallback onUploadStarted;
 
   @override
-  _CustomCameraPageState createState() => _CustomCameraPageState();
+  _BodyState createState() => _BodyState();
 }
 
-class _CustomCameraPageState extends State<CustomCameraPage> {
+class _BodyState extends State<Body> {
   StreamSubscription<UploadTaskProgress>? _progressSubscription;
   StreamSubscription<UploadTaskResponse>? _resultSubscription;
   Map<String, UploadItem> _tasks = {};
   CameraController? controller;
   List<CameraDescription>? cameras;
-  int _currentIndex = 0;
   var imagePath;
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
@@ -247,17 +246,17 @@ class _CustomCameraPageState extends State<CustomCameraPage> {
     File(ppp.path).renameSync(newPath);
     if (photoState <= 3) {
       setState(() {
-        photoState++;
         imagePath = newPath;
         imageList.add(newPath);
       });
-      _handleFileUpload([imageList[i]]);
+      await _handleFileUpload([imageList[i]]);
       debugPrint(imageList[i].toString());
+      photoState++;
       i++;
     }
   }
 
-  void _handleFileUpload(List<String> paths) async {
+  Future<void> _handleFileUpload(List<String> paths) async {
     final prefs = await SharedPreferences.getInstance();
     final binary = prefs.getBool('binary') ?? false;
     var result = 1;

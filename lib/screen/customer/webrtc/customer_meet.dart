@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ClerkPage extends StatefulWidget {
+class CustomerWebRTC extends StatefulWidget {
+  static const String routeName = '/customerWeb';
   @override
-  _ClerkPage createState() => new _ClerkPage();
+  _CustomerPage createState() => new _CustomerPage();
 }
 
-class _ClerkPage extends State<ClerkPage> {
+class _CustomerPage extends State<CustomerWebRTC> {
   final GlobalKey webViewKey = GlobalKey();
-
   InAppWebViewController? webViewController;
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
@@ -25,7 +25,6 @@ class _ClerkPage extends State<ClerkPage> {
       ));
 
   PullToRefreshController? pullToRefreshController;
-  String url = "";
   double progress = 0;
   final urlController = TextEditingController();
 
@@ -55,6 +54,8 @@ class _ClerkPage extends State<ClerkPage> {
 
   @override
   Widget build(BuildContext context) {
+    dynamic arguments = ModalRoute.of(context)!.settings.arguments;
+    String url = arguments["url"];
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -65,19 +66,14 @@ class _ClerkPage extends State<ClerkPage> {
             children: [
               InAppWebView(
                 key: webViewKey,
-                initialUrlRequest: URLRequest(
-                    url: Uri.parse(
-                        "https://vsid.ubt.ubot.com.tw:81/main/Login.html")),
+                initialUrlRequest: URLRequest(url: Uri.parse(url)),
                 initialOptions: options,
                 pullToRefreshController: pullToRefreshController,
                 onWebViewCreated: (controller) {
                   webViewController = controller;
                 },
-                onLoadStart: (controller, url) async {
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
+                onLoadStart: (controller, url) {
+                  setState(() {});
                 },
                 androidOnPermissionRequest:
                     (controller, origin, resources) async {
@@ -111,36 +107,7 @@ class _ClerkPage extends State<ClerkPage> {
                 },
                 onLoadStop: (controller, url) async {
                   pullToRefreshController!.endRefreshing();
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
-                  // if (Platform.isIOS && this.url.contains("Svideocall2.html")) {
-                  //   var js =
-                  //       "window.addEventListener('flutterInAppWebViewPlatformReady', function(event) {window.flutter_inappwebview.callHandler('mySum', 12, 2, 50).then(function(result) {console.log(result);});});";
-                  //   var script = UserScript(
-                  //       source: js,
-                  //       injectionTime:
-                  //           UserScriptInjectionTime.AT_DOCUMENT_START);
-                  //   await controller.addUserScript(userScript: script);
-
-                  //   controller.addJavaScriptHandler(
-                  //       handlerName: "mySum",
-                  //       callback: (args) {
-                  //         // Here you receive all the arguments from the JavaScript side
-                  //         // that is a List<dynamic>
-                  //         print("From the JavaScript side:");
-                  //         print(args);
-                  //         return args
-                  //             .reduce((value, element) => value + element);
-                  //       });
-                  // }
-
-                  // if (this.url.contains("Svideocall2.html")) {
-                  //   FlutterScreenRecording.startRecordScreen(
-                  //           DateTime.now().toString())
-                  //       .then((value) => print("start record"));
-                  // }
+                  setState(() {});
                 },
                 onLoadError: (controller, url, code, message) {
                   pullToRefreshController!.endRefreshing();
@@ -151,25 +118,15 @@ class _ClerkPage extends State<ClerkPage> {
                   }
                   setState(() {
                     this.progress = progress / 100;
-                    urlController.text = this.url;
                   });
                 },
                 onUpdateVisitedHistory: (controller, url, androidIsReload) {
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
+                  setState(() {});
                 },
                 onConsoleMessage: (controller, consoleMessage) {
-                  // if (consoleMessage.message.contains("RecordStart")) {
-                  //   print(consoleMessage);
-                  //   FlutterScreenRecording.startRecordScreen(
-                  //           DateTime.now().toString(),
-                  //           titleNotification: '開始錄影')
-                  //       .then((value) => print("screen record start"));
-                  // }
+                  print(consoleMessage);
                 },
-              ), //
+              ),
               progress < 1.0
                   ? LinearProgressIndicator(value: progress)
                   : Container(),
