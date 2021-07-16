@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
+import 'package:webcam_app/screen/clerk/login/clerk_login.dart';
+import 'package:webcam_app/screen/customer/login/customer_login.dart';
+import 'package:webcam_app/screen/customer/options/customer_options.dart';
 import 'component/button.dart';
 
 class Body extends StatelessWidget {
@@ -38,7 +41,7 @@ class Body extends StatelessWidget {
     // 背景監聽消息
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("在背景執行時收到訊息");
-      Navigator.pushNamed(context, '/customer');
+      Navigator.pushNamed(context, CustomerOptionsScreen.routeName);
     });
 
     return SingleChildScrollView(
@@ -51,19 +54,19 @@ class Body extends StatelessWidget {
             btnName: "客戶端",
             onPressed: () async {
               List<User> userList = await UserDao.instance.readAllNotes();
-              if (userList.length > 0) {
-                print('客戶已註冊');
-              } else {
-                Navigator.pushNamed(context, '/customer');
-              }
+              userList.length > 0
+                  ? Navigator.pushNamed(
+                      context, CustomerOptionsScreen.routeName)
+                  : Navigator.pushNamed(context, CustomerLoginScreen.routeName);
             },
           ),
           SizedBox(
             height: 50,
           ),
           ScreenButton(
-            onPressed: () => Navigator.pushNamed(context, '/clerk'),
             btnName: "行員端",
+            onPressed: () =>
+                Navigator.pushNamed(context, ClerkLoginScreen.routeName),
           ),
         ],
       ),

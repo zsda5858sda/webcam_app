@@ -10,8 +10,13 @@ import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webcam_app/screen/clerk/clerk_login.dart';
-import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/screen/clerk/login/clerk_login.dart';
+import 'package:webcam_app/screen/clerk/push_message/clerk_push_message.dart';
+import 'package:webcam_app/screen/customer/login/customer_login.dart';
+import 'package:webcam_app/screen/customer/options/customer_options.dart';
+import 'package:webcam_app/screen/customer/photo/customer_photo.dart';
+import 'package:webcam_app/screen/customer/webrtc/customer_manual.dart';
+import 'package:webcam_app/screen/customer/webrtc/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 
 final Uri uploadURL = Uri.parse(
@@ -109,7 +114,6 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -120,8 +124,13 @@ class MyApp extends StatelessWidget {
         channel: channel,
       ),
       routes: {
-        '/customer': (context) => CustomerLoginScreen(),
-        '/clerk': (context) => ClerkLoginScreen()
+        CustomerLoginScreen.routeName: (context) => CustomerLoginScreen(),
+        CustomerOptionsScreen.routeName: (context) => CustomerOptionsScreen(),
+        CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
+        CustomerWebRTC.routeName: (context) => CustomerWebRTC(),
+        CustomerMaunalScreen.routeName: (context) => CustomerMaunalScreen(),
+        ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
+        ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen()
       },
     );
   }
