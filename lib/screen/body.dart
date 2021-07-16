@@ -2,7 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:webcam_app/database/dao/user.dart';
+import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'component/button.dart';
 
@@ -28,11 +28,10 @@ class Body extends StatelessWidget {
                 channel.id,
                 channel.name,
                 channel.description,
-                // TODO add a proper drawable resource to android, for now using
-                //      one that already exists in example app.
                 icon: 'launch_background',
               ),
-            ));
+            ),
+            payload: message.data['url']);
       }
     });
 
@@ -49,7 +48,7 @@ class Body extends StatelessWidget {
             height: 100,
           ),
           ScreenButton(
-            btnName: "客戶登入",
+            btnName: "客戶端",
             onPressed: () async {
               List<User> userList = await UserDao.instance.readAllNotes();
               if (userList.length > 0) {
@@ -63,8 +62,8 @@ class Body extends StatelessWidget {
             height: 50,
           ),
           ScreenButton(
-            btnName: "行員登入",
             onPressed: () => Navigator.pushNamed(context, '/clerk'),
+            btnName: "行員端",
           ),
         ],
       ),

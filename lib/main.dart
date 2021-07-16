@@ -8,6 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/customer/customer_login.dart';
@@ -23,6 +24,11 @@ var channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
+
+/// Streams are created so that app can respond to notification-related events
+/// since the plugin is initialised in the `main` function
+final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
+    BehaviorSubject<ReceivedNotification>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -63,6 +69,39 @@ Future<void> main() async {
       badge: true,
       sound: true,
     );
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    /// Note: permissions aren't requested here just to demonstrate that can be
+    /// done later
+    final IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+            onDidReceiveLocalNotification:
+                (int id, String? title, String? body, String? payload) async {
+              didReceiveLocalNotificationSubject.add(ReceivedNotification(
+                  id: id, title: title, body: body, payload: payload));
+            });
+    const MacOSInitializationSettings initializationSettingsMacOS =
+        MacOSInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false);
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+            macOS: initializationSettingsMacOS);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (String? payload) async {
+      if (payload != null) {
+        debugPrint('notification payload: $payload');
+      }
+      selectNotificationSubject.add(payload);
+    });
   }
 
   runApp(MyApp());
@@ -229,4 +268,18 @@ void alert(BuildContext context) {
   );
 
   //print("in alert()");
+}
+
+class ReceivedNotification {
+  ReceivedNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.payload,
+  });
+
+  final int id;
+  final String? title;
+  final String? body;
+  final String? payload;
 }

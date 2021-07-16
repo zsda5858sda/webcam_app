@@ -31,46 +31,52 @@ class UserDao {
     await db.execute('''
 CREATE TABLE $tableUser ( 
   ${UserFields.id} $idType, 
-  ${UserFields.phone} $textType
+  ${UserFields.phone} $textType,
+  ${UserFields.webviewUrl} $textType
   )
 ''');
   }
 
-  Future<User> create(User user) async {
+  Future<User> insert(User user) async {
     final db = await instance.database;
 
     final id = await db.insert(tableUser, user.toJson());
     return user.copy(id: id.toString());
   }
 
-  // Future readUserById(String id) async {
-  //   final db = await instance.database;
+  Future readUserById(String id) async {
+    final db = await instance.database;
 
-  //   final maps = await db.query(
-  //     tableUser,
-  //     columns: UserFields.values,
-  //     where: '${UserFields.id} = ?',
-  //     whereArgs: [id],
-  //   );
+    final maps = await db.query(
+      tableUser,
+      columns: UserFields.values,
+      where: '${UserFields.id} = ?',
+      whereArgs: [id],
+    );
 
-  //   if (maps.isNotEmpty) {
-  //     return User.fromJson(maps.first);
-  //   } else {
-  //     throw Exception('ID $id not found');
-  //   }
-  // }
+    if (maps.isNotEmpty) {
+      return User.fromJson(maps.first);
+    } else {
+      throw Exception('ID $id not found');
+    }
+  }
 
-  // Future<List<User>> readAllNotes() async {
-  //   final db = await instance.database;
+  Future<List<User>> readAllNotes() async {
+    final db = await instance.database;
 
-  //   final orderBy = '${UserFields.id} ASC';
-  //   // final result =
-  //   //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
+    final orderBy = '${UserFields.id} ASC';
 
-  //   final result = await db.query(tableUser, orderBy: orderBy);
+    final result = await db.query(tableUser, orderBy: orderBy);
 
-  //   return result.map((json) => User.fromJson(json)).toList();
-  // }
+    return result.map((json) => User.fromJson(json)).toList();
+  }
+
+  Future<void> update(User user) async {
+    final db = await instance.database;
+
+    await db.update(tableUser, user.toJson(),
+        where: '${UserFields.id} = ?', whereArgs: [user.id]);
+  }
 
   // Future readUserByPhone(String phone) async {
   //   final db = await instance.database;
