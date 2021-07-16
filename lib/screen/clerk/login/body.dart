@@ -1,29 +1,27 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:webcam_app/screen/clerk/message_screen.dart';
+import 'package:webcam_app/screen/clerk/push_message/clerk_push_message.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/utils/hbcode.dart';
 import 'package:webcam_app/utils/login.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
-class ClerkScreen extends StatefulWidget {
+class Body extends StatefulWidget {
   @override
-  _ClerkScreen createState() => new _ClerkScreen();
+  _Body createState() => new _Body();
 }
 
-class _ClerkScreen extends State<ClerkScreen> {
+class _Body extends State<Body> {
   final idController = TextEditingController();
   final passwordController = TextEditingController();
   final hbCodeController = TextEditingController();
   Size size = ResponsiveApp().mq.size;
-
-  String code = '';
   @override
   void initState() {
     super.initState();
-    code = getCode();
   }
 
   @override
@@ -87,7 +85,6 @@ class _ClerkScreen extends State<ClerkScreen> {
                   HBCodeWidget(
                     size: size,
                     hbCodeController: hbCodeController,
-                    code: code,
                   ),
                   SizedBox(
                     height: size.height * 0.07,
@@ -95,22 +92,20 @@ class _ClerkScreen extends State<ClerkScreen> {
                   ScreenButton(
                       btnName: '登入',
                       onPressed: () async {
-                        if (code == hbCodeController.text) {
+                        if (HBCode.code == hbCodeController.text) {
                           await login(
                                   idController.text, passwordController.text)
-                              .then((_) => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return MessageScreen();
-                                      },
-                                    ),
-                                  ))
-                              .catchError((error) {
-                            showAlertDialog(context, "登入失敗", "帳號或密碼錯誤");
+                              .then((_) async {
+                            await showAlertDialog(context, "登入成功", "將跳轉至推播頁面");
+                            Navigator.pushNamed(
+                                context, ClerkPushMessageScreen.routeName);
+                          }).catchError((error) {
+                            String message = error.toString().split("|")[1];
+                            showAlertDialog(context, "登入失敗", message);
                           });
                         } else {
-                          showAlertDialog(context, "", "驗證碼錯誤");
+                          await showAlertDialog(context, "登入失敗", "驗證碼錯誤");
+                          setState(() {});
                         }
                       })
                 ],
@@ -120,13 +115,5 @@ class _ClerkScreen extends State<ClerkScreen> {
         ],
       ),
     );
-  }
-
-  String getCode() {
-    String _code = "";
-    for (var i = 0; i < 6; i++) {
-      _code = _code + Random().nextInt(9).toString();
-    }
-    return _code;
   }
 }

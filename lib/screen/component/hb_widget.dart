@@ -1,42 +1,56 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
-
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:random_string/random_string.dart';
 import 'package:hb_check_code/hb_check_code.dart';
+import 'package:webcam_app/utils/hbcode.dart';
 
-class HBCodeWidget extends StatelessWidget {
-  const HBCodeWidget({
-    Key? key,
-    required this.size,
-    required this.hbCodeController, 
-    required this.code,
-  }) : super(key: key);
-
+class HBCodeWidget extends StatefulWidget {
+  const HBCodeWidget(
+      {Key? key, required this.size, required this.hbCodeController})
+      : super(key: key);
   final Size size;
   final TextEditingController hbCodeController;
-  final String code;
+  @override
+  _HBCodeWidgetState createState() => _HBCodeWidgetState();
+}
+
+class _HBCodeWidgetState extends State<HBCodeWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Container(
-          child: HBCheckCode(
-            backgroundColor: Color(0xFFCCEEF7),
-            code: code,
-            dotCount: 20,
-            width: size.width * 0.3,
-            height: size.height * 0.06,
-          ),
+        Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {});
+              },
+              child: Container(
+                child: new HBCheckCode(
+                  backgroundColor: Color(0xFFD1E9E3),
+                  code: HBCode.getCode(),
+                  dotCount: 30,
+                  width: widget.size.width * 0.4,
+                  height: widget.size.height * 0.08,
+                ),
+              ),
+            ),
+            RichText(
+                text: TextSpan(
+                    style: TextStyle(color: Colors.grey[300]),
+                    children: <TextSpan>[TextSpan(text: "（點擊驗證碼以進行刷新）")]))
+          ],
         ),
         Container(
-          width: size.width * 0.3,
-          height: size.height * 0.06,
+          width: widget.size.width * 0.3,
+          height: widget.size.height * 0.06,
           child: TextField(
-            controller: hbCodeController,
+            controller: widget.hbCodeController,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
