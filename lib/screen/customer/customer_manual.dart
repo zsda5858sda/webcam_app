@@ -83,11 +83,6 @@ class CustomerMaunalScreen extends StatelessWidget {
                                 style: TextStyle(fontSize: 20), text: '下一步'),
                           ),
                         ),
-                        // child: ScreenButton(
-                        //     btnName: '下一步',
-                        //     onPressed: () async {
-
-                        //     }),
                       ),
                     ],
                   ),

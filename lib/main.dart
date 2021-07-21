@@ -12,7 +12,7 @@ import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/clerk/clerk_push_message.dart';
-import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_manual.dart';
@@ -124,7 +124,7 @@ class MyApp extends StatelessWidget {
         channel: channel,
       ),
       routes: {
-        CustomerLoginScreen.routeName: (context) => CustomerLoginScreen(),
+        CustomerRegisterScreen.routeName: (context) => CustomerRegisterScreen(),
         CustomerOptionsScreen.routeName: (context) => CustomerOptionsScreen(),
         CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
         CustomerWebRTC.routeName: (context) => CustomerWebRTC(),

@@ -6,7 +6,7 @@ import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:webcam_app/screen/component/button.dart';
-import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? Navigator.pushNamed(
                             context, CustomerOptionsScreen.routeName)
                         : Navigator.pushNamed(
-                            context, CustomerLoginScreen.routeName);
+                            context, CustomerRegisterScreen.routeName);
                     // final userDao = UserDao.instance;
                     // final url = (await userDao.readAllNotes()).first.webviewUrl;
                     // Navigator.pushNamed(context, CustomerWebRTC.routeName,

@@ -46,7 +46,7 @@ class ClerkPushMessageScreen extends StatelessWidget {
                         hintText: '請輸入客戶電話號碼',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
-                          const Radius.circular(20.0),
+                          const Radius.circular(10.0),
                         )),
                       ),
                     ),
