@@ -11,15 +11,15 @@ import 'package:webcam_app/utils/hbcode.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
-class CustomerLoginScreen extends StatefulWidget {
-  const CustomerLoginScreen({Key? key}) : super(key: key);
+class CustomerRegisterScreen extends StatefulWidget {
+  const CustomerRegisterScreen({Key? key}) : super(key: key);
   static const routeName = '/customerlogin';
 
   @override
-  _CustomerLoginScreenState createState() => _CustomerLoginScreenState();
+  _CustomerRegisterScreenState createState() => _CustomerRegisterScreenState();
 }
 
-class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
+class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final hbCodeController = TextEditingController();
