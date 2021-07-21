@@ -1,12 +1,10 @@
 import 'package:http/http.dart' as http;
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/clerkDAO.dart';
 import 'package:webcam_app/database/model/clerk.dart';
 
-String serveraddress = "vsid.ubt.ubot.com.tw:81";
-
 Future<void> login(String uid, String password) async {
   String encodePassword = Uri.encodeComponent(password);
-  String url = 'https://$serveraddress/getAD?user=$uid&pwd=$encodePassword';
   if (uid.isEmpty || password.isEmpty) {
     throw Exception("|請輸入帳號密碼");
   }
@@ -17,7 +15,7 @@ Future<void> login(String uid, String password) async {
   clerkDao.insert(Clerk(account: uid, password: password));
 
   await http.get(
-    Uri.parse(url),
+    Uri.parse(Config.LOGIN + "?user=$uid&pwd=$encodePassword"),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8'
     },
