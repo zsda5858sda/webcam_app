@@ -25,97 +25,6 @@ var hintText;
 var hintContent;
 var photoState = 1;
 
-// FlutterUploader _uploader = FlutterUploader();
-
-// void backgroundHandler() {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   // Notice these instances belong to a forked isolate.
-//   var uploader = FlutterUploader();
-
-//   var notifications = FlutterLocalNotificationsPlugin();
-
-//   // Only show notifications for unprocessed uploads.
-//   SharedPreferences.getInstance().then((preferences) {
-//     var processed = preferences.getStringList('processed') ?? <String>[];
-
-//     if (Platform.isAndroid) {
-//       uploader.progress.listen((progress) {
-//         if (processed.contains(progress.taskId)) {
-//           return;
-//         }
-
-//         notifications.show(
-//           progress.taskId.hashCode,
-//           'FlutterUploader Example',
-//           'Upload in Progress',
-//           NotificationDetails(
-//             android: AndroidNotificationDetails(
-//               'FlutterUploader.Example',
-//               'FlutterUploader',
-//               'Installed when you activate the Flutter Uploader Example',
-//               progress: progress.progress ?? 0,
-//               icon: 'ic_upload',
-//               enableVibration: false,
-//               importance: Importance.low,
-//               showProgress: true,
-//               onlyAlertOnce: true,
-//               maxProgress: 100,
-//               channelShowBadge: false,
-//             ),
-//             iOS: IOSNotificationDetails(),
-//           ),
-//         );
-//       });
-//     }
-
-//     uploader.result.listen((result) {
-//       if (processed.contains(result.taskId)) {
-//         return;
-//       }
-
-//       processed.add(result.taskId);
-//       preferences.setStringList('processed', processed);
-
-//       notifications.cancel(result.taskId.hashCode);
-
-//       final successful = result.status == UploadTaskStatus.complete;
-
-//       var title = 'Upload Complete';
-//       if (result.status == UploadTaskStatus.failed) {
-//         title = 'Upload Failed';
-//       } else if (result.status == UploadTaskStatus.canceled) {
-//         title = 'Upload Canceled';
-//       }
-
-//       notifications
-//           .show(
-//         result.taskId.hashCode,
-//         'FlutterUploader Example',
-//         title,
-//         NotificationDetails(
-//           android: AndroidNotificationDetails(
-//             'FlutterUploader.Example',
-//             'FlutterUploader',
-//             'Installed when you activate the Flutter Uploader Example',
-//             icon: 'ic_upload',
-//             enableVibration: !successful,
-//             importance: result.status == UploadTaskStatus.failed
-//                 ? Importance.high
-//                 : Importance.min,
-//           ),
-//           iOS: IOSNotificationDetails(
-//             presentAlert: true,
-//           ),
-//         ),
-//       )
-//           .catchError((e, stack) {
-//         print('error while showing notification: $e, $stack');
-//       });
-//     });
-//   });
-// }
-
 class CustomerPhotoScreen extends StatefulWidget {
   CustomerPhotoScreen({Key? key}) : super(key: key);
   static const String routeName = "/photo";
@@ -127,8 +36,6 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
   @override
   void initState() {
     super.initState();
-
-    // _uploader.setBackgroundHandler(backgroundHandler);
 
     var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     var initializationSettingsAndroid =
@@ -159,11 +66,6 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
           backgroundColor: Color(0xFF63BED0),
           body: Body(
             uploadURL: uploadURL,
-            // uploader: _uploader,
-            // onUploadStarted: () {
-            //   setState(() {});
-            //   debugPrint(_uploader.result.toString());
-            // },
           )),
     );
   }
@@ -172,13 +74,9 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
 class Body extends StatefulWidget {
   const Body({
     Key? key,
-    // required this.uploader,
     required this.uploadURL,
-    // required this.onUploadStarted,
   }) : super(key: key);
-  // final FlutterUploader uploader;
   final Uri uploadURL;
-  // final VoidCallback onUploadStarted;
 
   @override
   _BodyState createState() => _BodyState();
@@ -212,38 +110,6 @@ class _BodyState extends State<Body> {
   void initState() {
     super.initState();
     _camera();
-
-    // _progressSubscription = widget.uploader.progress.listen((progress) {
-    //   final task = _tasks[progress.taskId];
-    //   print(
-    //       'In MAIN APP: ID: ${progress.taskId}, progress: ${progress.progress}');
-    //   if (task == null) return;
-    //   if (task.isCompleted()) return;
-
-    //   var tmp = <String, UploadItem>{}..addAll(_tasks);
-    //   tmp.putIfAbsent(progress.taskId, () => UploadItem(progress.taskId));
-    //   tmp[progress.taskId] =
-    //       task.copyWith(progress: progress.progress, status: progress.status);
-    //   setState(() => _tasks = tmp);
-    // }, onError: (ex, stacktrace) {
-    //   print('exception: $ex');
-    //   print('stacktrace: $stacktrace');
-    // });
-
-    // _resultSubscription = widget.uploader.result.listen((result) {
-    //   print(
-    //       'IN MAIN APP: ${result.taskId}, status: ${result.status}, statusCode: ${result.statusCode}, headers: ${result.headers}');
-
-    //   var tmp = <String, UploadItem>{}..addAll(_tasks);
-    //   tmp.putIfAbsent(result.taskId, () => UploadItem(result.taskId));
-    //   tmp[result.taskId] =
-    //       tmp[result.taskId]!.copyWith(status: result.status, response: result);
-
-    //   setState(() => _tasks = tmp);
-    // }, onError: (ex, stacktrace) {
-    //   print('exception: $ex');
-    //   print('stacktrace: $stacktrace');
-    // });
   }
 
   @override
@@ -402,9 +268,6 @@ class _BodyState extends State<Body> {
     File(filePath).renameSync(newPath);
     if (photoState <= 3) {
       imagePath = newPath;
-      // imageList.add(newPath);
-      //       Uint8List byteData = await _image![0].readAsBytes();
-      // List<int> imageData = byteData.buffer.asUint8List();
       File file = File(imagePath);
       Uint8List bytes = file.readAsBytesSync();
       List<int> imageData = bytes.buffer.asUint8List();
