@@ -107,7 +107,6 @@ class _CustomerPage extends State<CustomerWebRTC> {
                 },
                 onLoadStop: (controller, url) async {
                   pullToRefreshController!.endRefreshing();
-                  setState(() {});
                 },
                 onLoadError: (controller, url, code, message) {
                   pullToRefreshController!.endRefreshing();
