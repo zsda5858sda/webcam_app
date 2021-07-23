@@ -62,7 +62,6 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
         return false;
       },
       child: Scaffold(
-          appBar: homeAppBar(),
           backgroundColor: Color(0xFF63BED0),
           body: Body(
             uploadURL: uploadURL,
@@ -143,9 +142,9 @@ class _BodyState extends State<Body> {
   Widget _cameraPreviewWidget() {
     return Center(
       child: SizedBox(
-        width: size.width * 0.85,
+        width: size.width,
+        height: size.height,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
           child: CameraPreview(
             controller!,
             child: buildCameraMask(),
@@ -189,22 +188,16 @@ class _BodyState extends State<Body> {
             child: Column(
               children: <Widget>[
                 Container(
-                  width: size.width * 0.85,
-                  height: cameraRect.left * 300 / cameraRect.width,
+                  width: size.width,
+                  height: size.height * 0.1,
                   color: Colors.black38,
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
                       hintText,
-                      style: TextStyle(fontSize: 22, color: Colors.white),
+                      style: TextStyle(fontSize: 30, color: Colors.white),
                     ),
                   ),
-                ),
-                Spacer(),
-                Container(
-                  width: size.width * 0.85,
-                  height: cameraRect.left * 300 / cameraRect.width,
-                  color: Colors.black38,
                 ),
               ],
             ),
@@ -230,26 +223,30 @@ class _BodyState extends State<Body> {
   }
 
   Widget _cameraButton() {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: takePicture,
-      child: Container(
-        height: 80,
-        color: Colors.black38,
+    return Container(
+        height: 100,
+        color: Colors.black,
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(horizontal: 15),
-        child: Stack(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                  onTap: takePicture,
-                  child: Icon(Icons.camera_alt, color: Colors.white, size: 50)),
-            )
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: takePicture,
+              child: Icon(
+                Icons.camera_alt,
+                color: Colors.black,
+                size: 50,
+              ),
+              style: ElevatedButton.styleFrom(
+                shape: CircleBorder(),
+                padding: EdgeInsets.all(15),
+                primary: Colors.white, // <-- Button color
+                onPrimary: Colors.red, // <-- Splash color
+              ),
+            ),
           ],
-        ),
-      ),
-    );
+        ));
   }
 
   @override
