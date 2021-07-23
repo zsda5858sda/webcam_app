@@ -1,9 +1,13 @@
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
@@ -12,6 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/customer/customer_login.dart';
 import 'package:webcam_app/screen/home_screen.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 final Uri uploadURL = Uri.parse(
   'https://vsid.ubt.ubot.com.tw:81/uploadpic',
@@ -25,7 +31,6 @@ var channel;
 var flutterLocalNotificationsPlugin;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
@@ -33,9 +38,8 @@ Future<void> main() async {
 
   _uploader.setBackgroundHandler(backgroundHandler);
   await Firebase.initializeApp();
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
+  await initPlatformState();
   if (!kIsWeb) {
     channel = const AndroidNotificationChannel(
       'high_importance_channel', // id
@@ -55,8 +59,8 @@ Future<void> main() async {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    /// Update the iOS foreground notification presentation options to allow
-    /// heads up notifications.
+    // / Update the iOS foreground notification presentation options to allow
+    // / heads up notifications.
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
@@ -92,8 +96,31 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
-
   print("Handling a background message: ${message.messageId}");
+}
+
+Future<void> initPlatformState() async {
+  bool jailbroken;
+  bool developerMode;
+  // Platform messages may fail, so we use a try/catch PlatformException.
+  try {
+    jailbroken = await FlutterJailbreakDetection.jailbroken;
+    developerMode = await FlutterJailbreakDetection.developerMode;
+  } on PlatformException {
+    jailbroken = true;
+    developerMode = true;
+  }
+
+  // If the widget was removed from the tree while the asynchronous platform
+  // message was in flight, we want to discard the reply rather than calling
+  // setState to update our non-existent appearance.
+  if (jailbroken) {
+    print('now is in jailbroken! Plz fix it');
+  } else if (developerMode) {
+    print('Its developing now');
+  } else {
+    print("Its safe now");
+  }
 }
 
 void backgroundHandler(BuildContext context) {
