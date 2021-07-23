@@ -1,6 +1,5 @@
-// ignore_for_file: import_of_legacy_library_into_null_safe
 import 'package:flutter/material.dart';
-import 'package:hb_check_code/hb_check_code.dart';
+import 'package:webcam_app/screen/upload/hb_check_code.dart';
 import 'package:webcam_app/utils/hbcode.dart';
 
 class HBCodeWidget extends StatefulWidget {
