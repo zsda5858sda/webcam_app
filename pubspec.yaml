@@ -27,14 +27,13 @@ dependencies:
   firebase_messaging: ^10.0.3
   flutter_local_notifications: ^6.0.0
   sqflite: ^2.0.0
-  random_string: ^2.1.0
-  hb_check_code: ^0.0.2
   image: ^3.0.2
   camera: 0.8.1+4
   path_provider: ^2.0.2
   cupertino_icons: ^1.0.2
   cloud_firestore: ^2.3.0
   rxdart: ^0.27.1
+
 
 dev_dependencies:
   flutter_test:
