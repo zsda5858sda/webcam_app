@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+FlutterUploader _uploader = FlutterUploader();
+var uploadUrl = "https://vsid.ubt.ubot.com.tw:81/main/Login.html";
 
 class MessagePushing extends StatefulWidget {
   const MessagePushing({Key? key}) : super(key: key);
@@ -74,7 +79,15 @@ class _MessagePushingState extends State<MessagePushing> {
                   SizedBox(
                     height: size.height * 0.07,
                   ),
-                  ScreenButton(btnName: '進行視訊', onPressed: () {})
+                  ScreenButton(
+                    btnName: '進行視訊',
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CustomerPage(
+                              uploader: _uploader, uploadURL: Uri.parse(uploadUrl))),
+                    ),
+                  )
                 ],
               ),
             ),
