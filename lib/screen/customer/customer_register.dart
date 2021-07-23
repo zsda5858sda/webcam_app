@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
-import 'package:webcam_app/screen/clerk/clerk_push_message.dart';
-import 'package:webcam_app/screen/component/hb_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webcam_app/database/dao/userDao.dart';
+import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/button.dart';
-import 'package:webcam_app/screen/customer/customer_meet.dart';
+import 'package:webcam_app/screen/component/hb_widget.dart';
+import 'package:webcam_app/screen/customer/customer_options.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:webcam_app/utils/hbcode.dart';
-import 'package:webcam_app/utils/login.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
-class ClerkLoginScreen extends StatefulWidget {
-  const ClerkLoginScreen({Key? key}) : super(key: key);
-  static final String routeName = '/clerklogin';
+class CustomerRegisterScreen extends StatefulWidget {
+  const CustomerRegisterScreen({Key? key}) : super(key: key);
+  static const routeName = '/customerlogin';
+
   @override
-  _ClerkLoginScreenState createState() => _ClerkLoginScreenState();
+  _CustomerRegisterScreenState createState() => _CustomerRegisterScreenState();
 }
 
-class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
-  final idController = TextEditingController();
-  final passwordController = TextEditingController();
+class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final hbCodeController = TextEditingController();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   Size size = ResponsiveApp().mq.size;
   @override
   void initState() {
@@ -61,7 +65,7 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: '請輸入員工編號',
+                            hintText: '請輸入身分證字號',
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
                               const Radius.circular(10.0),
@@ -75,12 +79,11 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                       Container(
                         width: size.width * 0.8,
                         child: TextField(
-                          obscureText: true,
-                          controller: passwordController,
+                          controller: phoneController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: '請輸入密碼',
+                            hintText: '請輸入電話號碼',
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
                               const Radius.circular(10.0),
@@ -104,25 +107,22 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (HBCode.code == hbCodeController.text) {
-                              await login(idController.text,
-                                      passwordController.text)
-                                  .then((_) async {
-                                await showAlertDialog(
-                                    context, "登入成功", "將跳轉至推播頁面");
-                                Navigator.pushNamed(
-                                    context, CustomerWebRTC.routeName);
-                              }).catchError((error) {
-                                String message = error.toString().split("|")[1];
-                                showAlertDialog(context, "登入失敗", message);
-                              });
+                              String id = idController.text;
+                              String phone = phoneController.text;
+                              String? token = await FCMService.getToken();
+                              addUserToFirestore(phone, token);
+                              addUserToLocalDB(id, phone);
+                              await showAlertDialog(
+                                  context, "登入成功", "將跳轉至功能首頁");
+                              Navigator.pushNamed(
+                                  context, CustomerOptionsScreen.routeName);
                             } else {
-                              await showAlertDialog(context, "登入失敗", "驗證碼錯誤");
-                              setState(() {});
+                              showAlertDialog(context, "", "驗證碼錯誤");
                             }
                           },
                           child: RichText(
                             text: TextSpan(
-                                style: TextStyle(fontSize: 20), text: '登入'),
+                                style: TextStyle(fontSize: 20), text: '註冊'),
                           ),
                         ),
                       ),
@@ -135,5 +135,20 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
         ],
       ),
     );
+  }
+
+  void addUserToLocalDB(id, phone) {
+    final user = User(
+      id: id,
+      phone: phone,
+      webviewUrl: "",
+    );
+    UserDao.instance.insert(user);
+  }
+
+  void addUserToFirestore(phone, token) {
+    DocumentReference<Map<String, dynamic>> users =
+        FirebaseFirestore.instance.collection('users').doc(phone);
+    users.set({"token": token});
   }
 }

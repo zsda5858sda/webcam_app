@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:webcam_app/database/dao/user.dart';
+import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
@@ -90,7 +90,6 @@ class _CustomerScreen extends State<CustomerScreen> {
                 HBCodeWidget(
                   size: size,
                   hbCodeController: hbCodeController,
-                  code: code,
                 ),
                 SizedBox(
                   height: size.height * 0.07,
@@ -119,9 +118,9 @@ class _CustomerScreen extends State<CustomerScreen> {
   void addUserToLocalDB(id, phone) {
     final user = User(
       id: id,
-      phone: phone,
+      phone: phone, webviewUrl: '',
     );
-    UserDao.instance.create(user);
+    UserDao.instance.insert(user);
   }
 
   void addUserToFirestore(phone, token) {

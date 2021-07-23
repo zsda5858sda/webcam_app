@@ -12,31 +12,40 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
-import 'package:webcam_app/screen/customer/customer_login.dart';
+import 'package:webcam_app/screen/clerk/clerk_push_message.dart';
+import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
+import 'package:webcam_app/screen/customer/customer_register.dart';
+import 'package:webcam_app/screen/customer/customer_options.dart';
+import 'package:webcam_app/screen/customer/customer_photo.dart';
+import 'package:webcam_app/screen/customer/customer_manual.dart';
+import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
-final Uri uploadURL = Uri.parse(
-  'https://vsid.ubt.ubot.com.tw:81/uploadpic',
-);
-FlutterUploader _uploader = FlutterUploader();
-
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
-
+FlutterUploader _uploader = FlutterUploader();
+var uploadUrl = "https://vsid.ubt.ubot.com.tw:81/uploadvideo";
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
+
+/// Streams are created so that app can respond to notification-related events
+/// since the plugin is initialised in the `main` function
+final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
+    BehaviorSubject<ReceivedNotification>();
 Future<void> main() async {
+  // 視覺輔助排版工具
+  // debugPaintSizeEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
   await Permission.storage.request();
 
-  _uploader.setBackgroundHandler(backgroundHandler);
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await initPlatformState();
@@ -67,6 +76,39 @@ Future<void> main() async {
       badge: true,
       sound: true,
     );
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    /// Note: permissions aren't requested here just to demonstrate that can be
+    /// done later
+    final IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+            onDidReceiveLocalNotification:
+                (int id, String? title, String? body, String? payload) async {
+              didReceiveLocalNotificationSubject.add(ReceivedNotification(
+                  id: id, title: title, body: body, payload: payload));
+            });
+    const MacOSInitializationSettings initializationSettingsMacOS =
+        MacOSInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false);
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+            macOS: initializationSettingsMacOS);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (String? payload) async {
+      if (payload != null) {
+        debugPrint('notification payload: $payload');
+      }
+      selectNotificationSubject.add(payload);
+    });
   }
 
   runApp(MyApp());
@@ -74,7 +116,6 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -85,8 +126,14 @@ class MyApp extends StatelessWidget {
         channel: channel,
       ),
       routes: {
-        '/customer': (context) => CustomerLoginScreen(),
-        '/clerk': (context) => ClerkLoginScreen()
+        CustomerRegisterScreen.routeName: (context) => CustomerRegisterScreen(),
+        CustomerOptionsScreen.routeName: (context) => CustomerOptionsScreen(),
+        CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
+        CustomerWebRTC.routeName: (context) => CustomerWebRTC(uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
+        CustomerMaunalScreen.routeName: (context) => CustomerMaunalScreen(),
+        CustomerPhotoDocScreen.routeName: (context) => CustomerPhotoDocScreen(),
+        ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
+        ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen()
       },
     );
   }
@@ -97,6 +144,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
   print("Handling a background message: ${message.messageId}");
+}
+
+class ReceivedNotification {
+  var id;
+  var title;
+  var body;
+  var payload;
+
+  ReceivedNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.payload,
+  });
 }
 
 Future<void> initPlatformState() async {
@@ -121,139 +182,96 @@ Future<void> initPlatformState() async {
   } else {
     print("Its safe now");
   }
-}
 
-void backgroundHandler(BuildContext context) {
-  // Notice these instances belong to a forked isolate.
-  var uploader = FlutterUploader();
+  void backgroundHandler(BuildContext context) {
+    // Notice these instances belong to a forked isolate.
+    var uploader = FlutterUploader();
 
-  var notifications = FlutterLocalNotificationsPlugin();
+    var notifications = FlutterLocalNotificationsPlugin();
 
-  // Only show notifications for unprocessed uploads.
-  SharedPreferences.getInstance().then((preferences) {
-    var processed = preferences.getStringList('processed') ?? <String>[];
+    // Only show notifications for unprocessed uploads.
+    SharedPreferences.getInstance().then((preferences) {
+      var processed = preferences.getStringList('processed') ?? <String>[];
 
-    if (Platform.isAndroid) {
-      uploader.progress.listen((progress) {
-        if (processed.contains(progress.taskId)) {
+      if (Platform.isAndroid) {
+        uploader.progress.listen((progress) {
+          if (processed.contains(progress.taskId)) {
+            return;
+          }
+
+          notifications.show(
+            progress.taskId.hashCode,
+            'FlutterUploader Example',
+            'Upload in Progress',
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                'FlutterUploader.Example',
+                'FlutterUploader',
+                'Installed when you activate the Flutter Uploader Example',
+                progress: progress.progress ?? 0,
+                icon: 'ic_upload',
+                enableVibration: false,
+                importance: Importance.low,
+                showProgress: true,
+                onlyAlertOnce: true,
+                maxProgress: 100,
+                channelShowBadge: false,
+              ),
+              iOS: IOSNotificationDetails(),
+            ),
+          );
+        });
+      }
+
+      uploader.result.listen((result) {
+        if (processed.contains(result.taskId)) {
           return;
         }
 
-        notifications.show(
-          progress.taskId.hashCode,
+        processed.add(result.taskId);
+        preferences.setStringList('processed', processed);
+
+        notifications.cancel(result.taskId.hashCode);
+
+        final successful = result.status == UploadTaskStatus.complete;
+        debugPrint(result.status.toString() + '15515');
+        var title = 'Upload Complete';
+        if (result.status == UploadTaskStatus.failed) {
+          title = 'Upload Failed';
+        } else if (result.status == UploadTaskStatus.canceled) {
+          title = 'Upload Canceled';
+        }
+
+        notifications
+            .show(
+          result.taskId.hashCode,
           'FlutterUploader Example',
-          'Upload in Progress',
+          title,
           NotificationDetails(
             android: AndroidNotificationDetails(
               'FlutterUploader.Example',
               'FlutterUploader',
               'Installed when you activate the Flutter Uploader Example',
-              progress: progress.progress ?? 0,
               icon: 'ic_upload',
-              enableVibration: false,
-              importance: Importance.low,
-              showProgress: true,
-              onlyAlertOnce: true,
-              maxProgress: 100,
-              channelShowBadge: false,
+              enableVibration: !successful,
+              importance: result.status == UploadTaskStatus.failed
+                  ? Importance.high
+                  : Importance.min,
             ),
-            iOS: IOSNotificationDetails(),
+            iOS: IOSNotificationDetails(
+              presentAlert: true,
+            ),
           ),
-        );
-      });
-    }
-
-    uploader.result.listen((result) {
-      if (processed.contains(result.taskId)) {
-        return;
-      }
-
-      processed.add(result.taskId);
-      preferences.setStringList('processed', processed);
-
-      notifications.cancel(result.taskId.hashCode);
-
-      final successful = result.status == UploadTaskStatus.complete;
-      alert(context);
-      debugPrint(result.status.toString() + '15515');
-      var title = 'Upload Complete';
-      if (result.status == UploadTaskStatus.failed) {
-        title = 'Upload Failed';
-        alert(context);
-      } else if (result.status == UploadTaskStatus.canceled) {
-        title = 'Upload Canceled';
-        alert(context);
-      }
-
-      notifications
-          .show(
-        result.taskId.hashCode,
-        'FlutterUploader Example',
-        title,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            'FlutterUploader.Example',
-            'FlutterUploader',
-            'Installed when you activate the Flutter Uploader Example',
-            icon: 'ic_upload',
-            enableVibration: !successful,
-            importance: result.status == UploadTaskStatus.failed
-                ? Importance.high
-                : Importance.min,
-          ),
-          iOS: IOSNotificationDetails(
-            presentAlert: true,
-          ),
-        ),
-      )
-          .catchError((e, stack) {
-        print('error while showing notification: $e, $stack');
+        )
+            .catchError((e, stack) {
+          print('error while showing notification: $e, $stack');
+        });
       });
     });
-  });
-}
 
-void alert(BuildContext context) {
-  AlertDialog dialog = AlertDialog(
-    backgroundColor: Colors.yellow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(15)),
-    ),
-    content: Row(
-      children: <Widget>[
-        Icon(
-          Icons.warning,
-          color: Colors.red,
-          size: 30,
-        ),
-        Padding(padding: EdgeInsets.only(right: 10)),
-        Text(
-          "This is a dialog.",
-          style: TextStyle(
-            color: Colors.red,
-            fontSize: 30,
-          ),
-        ),
-      ],
-    ),
-    actions: <Widget>[
-      FlatButton(
-        onPressed: () {
-          Navigator.pop(context, true);
-        },
-        child: Text(
-          "CLOSE",
-          style: TextStyle(color: Colors.black),
-        ),
-      ),
-    ],
-  );
-
-  showDialog(
-    barrierDismissible: false,
-    context: context,
-    builder: (BuildContext context) => dialog,
-  );
-
-  //print("in alert()");
+    final int id;
+    final String? title;
+    final String? body;
+    final String? payload;
+  }
 }

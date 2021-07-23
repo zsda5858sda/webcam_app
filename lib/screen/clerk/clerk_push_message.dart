@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:webcam_app/screen/component/app_bar.dart';
+import 'package:webcam_app/database/dao/clerkDao.dart';
+import 'package:webcam_app/database/model/clerk.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
+import 'package:webcam_app/screen/component/app_bar.dart';
+import 'package:webcam_app/database/dao/clerkDao.dart';
+import 'package:webcam_app/database/model/clerk.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webcam_app/utils/response_app.dart';
 
 FlutterUploader _uploader = FlutterUploader();
 var uploadUrl = "https://vsid.ubt.ubot.com.tw:81/main/Login.html";
-
-class MessagePushing extends StatefulWidget {
-  const MessagePushing({Key? key}) : super(key: key);
-
-  @override
-  _MessagePushingState createState() => _MessagePushingState();
-}
-
-final phoneController = TextEditingController();
-
-class _MessagePushingState extends State<MessagePushing> {
+class ClerkPushMessageScreen extends StatelessWidget {
+  static final String routeName = '/pushmessage';
+  final TextEditingController phoneController = TextEditingController();
+  final Size size = ResponsiveApp().mq.size;
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-      child: Column(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      appBar: homeAppBar(),
+      body: Wrap(
+        spacing: 4.0,
+        runSpacing: 8.0,
         children: <Widget>[
           Container(
             height: size.height,
@@ -50,7 +53,7 @@ class _MessagePushingState extends State<MessagePushing> {
                         hintText: '請輸入客戶電話號碼',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
-                          const Radius.circular(20.0),
+                          const Radius.circular(10.0),
                         )),
                       ),
                     ),
@@ -74,7 +77,9 @@ class _MessagePushingState extends State<MessagePushing> {
                               snapshot.data() as Map<String, dynamic>;
                           token = data['token'];
                         });
-                        FCMService.sendToCustomer(token);
+                        List<Clerk> clerk =
+                            await ClerkDao.instance.readAllNotes();
+                        FCMService.sendToCustomer(token, clerk.first.account);
                       }),
                   SizedBox(
                     height: size.height * 0.07,
@@ -84,7 +89,7 @@ class _MessagePushingState extends State<MessagePushing> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => CustomerPage(
+                          builder: (context) => CustomerWebRTC(
                               uploader: _uploader, uploadURL: Uri.parse(uploadUrl))),
                     ),
                   )

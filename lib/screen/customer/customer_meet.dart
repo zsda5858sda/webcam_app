@@ -100,10 +100,12 @@ void backgroundHandler() {
   });
 }
 
-class CustomerPage extends StatefulWidget {
+class CustomerWebRTC extends StatefulWidget {
   // dynamic data;
   // CustomerPage(this.data);
-  const CustomerPage({
+  static final String routeName = '/customerWeb';
+
+  const CustomerWebRTC({
     Key? key,
     required this.uploader,
     required this.uploadURL,
@@ -112,12 +114,11 @@ class CustomerPage extends StatefulWidget {
   final FlutterUploader uploader;
   final Uri uploadURL;
   @override
-  _CustomerPage createState() => new _CustomerPage();
+  _CustomerWebRtc createState() => new _CustomerWebRtc();
 }
 
-class _CustomerPage extends State<CustomerPage> {
+class _CustomerWebRtc extends State<CustomerWebRTC> {
   final GlobalKey webViewKey = GlobalKey();
-
   InAppWebViewController? webViewController;
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
@@ -133,7 +134,6 @@ class _CustomerPage extends State<CustomerPage> {
       ));
 
   PullToRefreshController? pullToRefreshController;
-  String url = "";
   double progress = 0;
   final urlController = TextEditingController();
 
@@ -178,6 +178,8 @@ class _CustomerPage extends State<CustomerPage> {
     var sec =
         now.second < 10 ? "0" + now.second.toString() : now.second.toString();
     var datetime = year + month + day + hour + min + sec;
+    dynamic arguments = ModalRoute.of(context)!.settings.arguments;
+    // String url = arguments["url"];
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -188,7 +190,7 @@ class _CustomerPage extends State<CustomerPage> {
             children: [
               InAppWebView(
                 key: webViewKey,
-                initialUrlRequest: URLRequest(url: Uri.parse(finalUrl)),
+                initialUrlRequest: URLRequest(url: Uri.parse(url)),
                 initialOptions: options,
                 pullToRefreshController: pullToRefreshController,
                 onWebViewCreated: (controller) {
@@ -210,10 +212,7 @@ class _CustomerPage extends State<CustomerPage> {
                   );
                 },
                 onLoadStart: (controller, url) {
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
+                  setState(() {});
                 },
                 onReceivedServerTrustAuthRequest:
                     (controller, challenge) async {
@@ -253,10 +252,6 @@ class _CustomerPage extends State<CustomerPage> {
                 },
                 onLoadStop: (controller, url) async {
                   pullToRefreshController!.endRefreshing();
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
                 },
                 onLoadError: (controller, url, code, message) {
                   pullToRefreshController!.endRefreshing();
@@ -267,14 +262,10 @@ class _CustomerPage extends State<CustomerPage> {
                   }
                   setState(() {
                     this.progress = progress / 100;
-                    urlController.text = this.url;
                   });
                 },
                 onUpdateVisitedHistory: (controller, url, androidIsReload) {
-                  setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
-                  });
+                  setState(() {});
                 },
                 onDownloadStart: (controller, url) async {
                   print("onDownloadStart $url");
