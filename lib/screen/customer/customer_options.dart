@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:webcam_app/screen/home_screen.dart';
+import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/customer/customer_manual.dart';
@@ -48,7 +49,11 @@ class CustomerOptionsScreen extends StatelessWidget {
                     SizedBox(
                       height: size.height * 0.07,
                     ),
-                    ScreenButton(btnName: '功能2', onPressed: () {}),
+                    ScreenButton(
+                        btnName: '上傳檔案',
+                        onPressed: () {
+                          Navigator.pushNamed(context, fileUpload.routeName);
+                        }),
                     SizedBox(
                       height: size.height * 0.07,
                     ),

@@ -151,10 +151,12 @@ class _UploadScreenState extends State<UploadScreen> {
     await prefs.setBool('binary', binary);
 
     var images = await imagePicker.getMultiImage();
+    int count = 4;
     if (images!.isNotEmpty) {
       for (PickedFile image in images) {
         String dir = path.dirname(image.path);
-        String newPath = path.join(dir, 'work01T-A12345678-1.jpg');
+        String newPath = path.join(dir, 'work01T-A12345678-$count.jpg');
+        count++;
         File(image.path).renameSync(newPath);
         debugPrint(newPath);
         _handleFileUpload([newPath]);

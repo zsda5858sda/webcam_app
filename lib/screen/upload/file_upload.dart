@@ -109,6 +109,7 @@ void backgroundHandler() {
 
 class fileUpload extends StatefulWidget {
   fileUpload({Key? key}) : super(key: key);
+  static const String routeName = '/fileupload';
 
   @override
   _fileUpload createState() => _fileUpload();

@@ -23,6 +23,7 @@ import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_manual.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
+import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
@@ -30,6 +31,7 @@ import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 var channel;
 FlutterUploader _uploader = FlutterUploader();
 var uploadUrl = "https://vsid.ubt.ubot.com.tw:81/uploadvideo";
+
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
 
@@ -129,11 +131,13 @@ class MyApp extends StatelessWidget {
         CustomerRegisterScreen.routeName: (context) => CustomerRegisterScreen(),
         CustomerOptionsScreen.routeName: (context) => CustomerOptionsScreen(),
         CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
-        CustomerWebRTC.routeName: (context) => CustomerWebRTC(uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
+        CustomerWebRTC.routeName: (context) => CustomerWebRTC(
+            uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
         CustomerMaunalScreen.routeName: (context) => CustomerMaunalScreen(),
         CustomerPhotoDocScreen.routeName: (context) => CustomerPhotoDocScreen(),
         ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
-        ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen()
+        ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen(),
+        fileUpload.routeName: (context) => fileUpload()
       },
     );
   }
