@@ -70,14 +70,14 @@ Future<void> main() async {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // / Update the iOS foreground notification presentation options to allow
-    // / heads up notifications.
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    /// Update the iOS foreground notification presentation options to allow
+    /// heads up notifications.
+    // await FirebaseMessaging.instance
+    //     .setForegroundNotificationPresentationOptions(
+    //   alert: true,
+    //   badge: true,
+    //   sound: true,
+    // );
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -85,9 +85,9 @@ Future<void> main() async {
     /// done later
     final IOSInitializationSettings initializationSettingsIOS =
         IOSInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true,
             onDidReceiveLocalNotification:
                 (int id, String? title, String? body, String? payload) async {
               didReceiveLocalNotificationSubject.add(ReceivedNotification(
