@@ -28,7 +28,7 @@ class User {
         phone: phone ?? this.phone,
       );
 
-  static User fromJson(Map<String, Object> json) => User(
+  static User fromJson(Map<String, dynamic> json) => User(
         id: json[UserFields.id] as String,
         phone: json[UserFields.phone] as String,
       );
