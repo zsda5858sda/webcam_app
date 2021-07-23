@@ -4,25 +4,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/clerk/clerk_push_message.dart';
+import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_manual.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
-
-final Uri uploadURL = Uri.parse(
-  'https://vsid.ubt.ubot.com.tw:81/uploadpic',
-);
-FlutterUploader _uploader = FlutterUploader();
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
@@ -35,14 +30,14 @@ var flutterLocalNotificationsPlugin;
 final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
     BehaviorSubject<ReceivedNotification>();
 Future<void> main() async {
+  // 視覺輔助排版工具
+  // debugPaintSizeEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
-
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
   await Permission.storage.request();
 
-  _uploader.setBackgroundHandler(backgroundHandler);
   await Firebase.initializeApp();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -129,6 +124,7 @@ class MyApp extends StatelessWidget {
         CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
         CustomerWebRTC.routeName: (context) => CustomerWebRTC(),
         CustomerMaunalScreen.routeName: (context) => CustomerMaunalScreen(),
+        CustomerPhotoDocScreen.routeName: (context) => CustomerPhotoDocScreen(),
         ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
         ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen()
       },
