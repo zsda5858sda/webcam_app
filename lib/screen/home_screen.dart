@@ -37,22 +37,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final channel = widget.channel;
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      if (notification != null && android != null && !kIsWeb) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                icon: 'launch_background',
-              ),
+      flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification!.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channel.description,
+              icon: 'launch_background',
             ),
-            payload: message.data['url']);
-      }
+          ),
+          payload: message.data['url']);
     });
 
     // 背景監聽消息
