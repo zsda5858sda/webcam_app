@@ -22,8 +22,6 @@ var hintText;
 var hintContent;
 var photoState = 1;
 
-FlutterUploader _uploader = FlutterUploader();
-
 class CustomerPhotoDocScreen extends StatefulWidget {
   CustomerPhotoDocScreen({Key? key}) : super(key: key);
   static const String routeName = "/photodoc";
@@ -71,6 +69,7 @@ class _BodyState extends State<Body> {
   var imagePath;
   final Size size = ResponsiveApp().mq.size;
   ImagePicker imagePicker = ImagePicker();
+  FlutterUploader _uploader = FlutterUploader();
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -91,7 +90,6 @@ class _BodyState extends State<Body> {
   void initState() {
     super.initState();
     _camera();
-    _uploader.setBackgroundHandler(backgroundHandler);
   }
 
   @override
@@ -334,80 +332,4 @@ class _BodyState extends State<Body> {
     );
     // }
   }
-}
-
-void backgroundHandler() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Notice these instances belong to a forked isolate.
-  var uploader = FlutterUploader();
-
-  // Only show notifications for unprocessed uploads.
-  SharedPreferences.getInstance().then((preferences) {
-    var processed = preferences.getStringList('processed') ?? <String>[];
-
-    // if (Platform.isAndroid) {
-    //   uploader.progress.listen((progress) {
-    //     if (processed.contains(progress.taskId)) {
-    //       return;
-    //     }
-
-    //     flutterLocalNotificationsPlugin.show(
-    //       progress.taskId.hashCode,
-    //       'FlutterUploader Example',
-    //       'Upload in Progress',
-    //       NotificationDetails(
-    //         android: AndroidNotificationDetails(
-    //           'FlutterUploader.Example',
-    //           'FlutterUploader',
-    //           'Installed when you activate the Flutter Uploader Example',
-    //           progress: progress.progress ?? 0,
-    //           icon: 'ic_upload',
-    //           enableVibration: false,
-    //           importance: Importance.low,
-    //           showProgress: true,
-    //           onlyAlertOnce: true,
-    //           maxProgress: 100,
-    //           channelShowBadge: false,
-    //         ),
-    //         iOS: IOSNotificationDetails(),
-    //       ),
-    //     );
-    //   });
-    // }
-
-    uploader.result.listen((result) {
-      if (processed.contains(result.taskId)) {
-        return;
-      }
-
-      processed.add(result.taskId);
-      preferences.setStringList('processed', processed);
-
-      var title = 'Upload Complete';
-      // if (result.status == UploadTaskStatus.failed) {
-      //   title = 'Upload Failed';
-      // } else if (result.status == UploadTaskStatus.canceled) {
-      //   title = 'Upload Canceled';
-      // }
-
-      flutterLocalNotificationsPlugin
-          .show(
-        result.taskId.hashCode,
-        title,
-        '上傳成功',
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            channel.id,
-            channel.name,
-            channel.description,
-            icon: 'launch_background',
-          ),
-        ),
-      )
-          .catchError((e, stack) {
-        print('error while showing notification: $e, $stack');
-      });
-    });
-  });
 }

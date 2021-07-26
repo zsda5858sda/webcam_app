@@ -1,13 +1,11 @@
 import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
@@ -24,7 +22,6 @@ import 'package:webcam_app/screen/customer/customer_manual.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/screen/upload/file_upload.dart';
-import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
@@ -47,9 +44,12 @@ Future<void> main() async {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
   await Permission.storage.request();
+  await Permission.camera.request();
+  await Permission.microphone.request();
 
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  _uploader.setBackgroundHandler(backgroundHandler);
   await initPlatformState();
   if (!kIsWeb) {
     channel = const AndroidNotificationChannel(
@@ -186,96 +186,49 @@ Future<void> initPlatformState() async {
   } else {
     print("Its safe now");
   }
+}
 
-  void backgroundHandler(BuildContext context) {
-    // Notice these instances belong to a forked isolate.
-    var uploader = FlutterUploader();
+void backgroundHandler() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    var notifications = FlutterLocalNotificationsPlugin();
+  // Notice these instances belong to a forked isolate.
+  var uploader = FlutterUploader();
+  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  // Only show notifications for unprocessed uploads.
+  SharedPreferences.getInstance().then((preferences) {
+    var processed = preferences.getStringList('processed') ?? <String>[];
 
-    // Only show notifications for unprocessed uploads.
-    SharedPreferences.getInstance().then((preferences) {
-      var processed = preferences.getStringList('processed') ?? <String>[];
-
-      if (Platform.isAndroid) {
-        uploader.progress.listen((progress) {
-          if (processed.contains(progress.taskId)) {
-            return;
-          }
-
-          notifications.show(
-            progress.taskId.hashCode,
-            'FlutterUploader Example',
-            'Upload in Progress',
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                'FlutterUploader.Example',
-                'FlutterUploader',
-                'Installed when you activate the Flutter Uploader Example',
-                progress: progress.progress ?? 0,
-                icon: 'ic_upload',
-                enableVibration: false,
-                importance: Importance.low,
-                showProgress: true,
-                onlyAlertOnce: true,
-                maxProgress: 100,
-                channelShowBadge: false,
-              ),
-              iOS: IOSNotificationDetails(),
-            ),
-          );
-        });
+    uploader.result.listen((result) {
+      if (processed.contains(result.taskId)) {
+        return;
       }
 
-      uploader.result.listen((result) {
-        if (processed.contains(result.taskId)) {
-          return;
-        }
+      processed.add(result.taskId);
+      preferences.setStringList('processed', processed);
 
-        processed.add(result.taskId);
-        preferences.setStringList('processed', processed);
-
-        notifications.cancel(result.taskId.hashCode);
-
-        final successful = result.status == UploadTaskStatus.complete;
-        debugPrint(result.status.toString() + '15515');
-        var title = 'Upload Complete';
-        if (result.status == UploadTaskStatus.failed) {
-          title = 'Upload Failed';
-        } else if (result.status == UploadTaskStatus.canceled) {
-          title = 'Upload Canceled';
-        }
-
-        notifications
-            .show(
-          result.taskId.hashCode,
-          'FlutterUploader Example',
-          title,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              'FlutterUploader.Example',
-              'FlutterUploader',
-              'Installed when you activate the Flutter Uploader Example',
-              icon: 'ic_upload',
-              enableVibration: !successful,
-              importance: result.status == UploadTaskStatus.failed
-                  ? Importance.high
-                  : Importance.min,
-            ),
-            iOS: IOSNotificationDetails(
-              presentAlert: true,
-            ),
+      var title = 'Upload Complete';
+      if (result.status == UploadTaskStatus.failed) {
+        title = 'Upload Failed';
+      } else if (result.status == UploadTaskStatus.canceled) {
+        title = 'Upload Canceled';
+      }
+      flutterLocalNotificationsPlugin
+          .show(
+        result.taskId.hashCode,
+        'FlutterUploader Example',
+        title,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'high_importance_channel',
+            'High Importance Notifications',
+            'This channel is used for important notifications.',
+            icon: 'launch_background',
           ),
-        )
-            .catchError((e, stack) {
-          print('error while showing notification: $e, $stack');
-        });
+        ),
+      )
+          .catchError((e, stack) {
+        print('error while showing notification: $e, $stack');
       });
     });
-
-    final int id;
-    final String? title;
-    final String? body;
-    final String? payload;
-  }
+  });
 }
