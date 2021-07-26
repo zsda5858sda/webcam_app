@@ -1,9 +1,9 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
-import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
@@ -112,6 +112,9 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                               String? token = await FCMService.getToken();
                               addUserToFirestore(phone, token);
                               addUserToLocalDB(id, phone);
+                              // subscribe to topic on each app start-up
+                              await FirebaseMessaging.instance
+                                  .subscribeToTopic('customer');
                               await showAlertDialog(
                                   context, "登入成功", "將跳轉至功能首頁");
                               Navigator.pushNamed(
