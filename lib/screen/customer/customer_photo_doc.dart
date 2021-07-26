@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:camera/camera.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -297,6 +298,14 @@ class _BodyState extends State<Body> {
       String fileName = image.name;
       String newPath = path.join("/storage/emulated/0/Download", fileName);
       File(newPath).writeAsBytes(await File(filePath).readAsBytes());
+      Fluttertoast.showToast(
+          msg: "相片儲存於$newPath",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 20.0);
     }
   }
 
