@@ -62,7 +62,6 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
         return false;
       },
       child: Scaffold(
-          appBar: homeAppBar(),
           backgroundColor: Color(0xFF63BED0),
           body: Body(
             uploadURL: uploadURL,
@@ -144,7 +143,7 @@ class _BodyState extends State<Body> {
     return Center(
       child: SizedBox(
         width: size.width,
-        height: size.height,
+        height: size.height * 0.9,
         child: ClipRRect(
           child: CameraPreview(
             controller!,
@@ -228,7 +227,6 @@ class _BodyState extends State<Body> {
         height: 100,
         color: Colors.black,
         alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: 15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -255,6 +253,8 @@ class _BodyState extends State<Body> {
     super.dispose();
     _progressSubscription?.cancel();
     _resultSubscription?.cancel();
+
+    controller?.dispose();
   }
 
   // var imageList = <String>[];
@@ -317,15 +317,15 @@ class _BodyState extends State<Body> {
             FlatButton(
                 child: Text("確認"),
                 onPressed: () async {
+                  setState(() {
+                    photoState++;
+                  });
                   if (photoState > 3) {
                     final userDao = UserDao.instance;
                     final url = (await userDao.readAllNotes()).first.webviewUrl;
                     Navigator.pushNamed(context, CustomerWebRTC.routeName,
                         arguments: {"url": url});
                   } else {
-                    setState(() {
-                      photoState++;
-                    });
                     Navigator.pop(context);
                   }
                 }),

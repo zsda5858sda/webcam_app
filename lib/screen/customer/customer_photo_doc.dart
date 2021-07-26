@@ -106,7 +106,8 @@ class _BodyState extends State<Body> {
               height: double.infinity,
               child: Column(
                 children: <Widget>[
-                  Container(child: _cameraWidget()),
+                  _cameraWidget(),
+                  _cameraButton(),
                 ],
               ),
             ),
@@ -129,7 +130,7 @@ class _BodyState extends State<Body> {
     return Center(
       child: SizedBox(
         width: size.width,
-        height: size.height,
+        height: size.height * 0.9,
         child: ClipRRect(
           child: CameraPreview(
             controller!,
@@ -175,7 +176,7 @@ class _BodyState extends State<Body> {
               children: <Widget>[
                 Container(
                   width: size.width,
-                  height: cameraRect.left * 400 / cameraRect.width,
+                  height: size.height * 0.1,
                   color: Colors.black38,
                   child: Align(
                     alignment: Alignment.center,
@@ -197,8 +198,6 @@ class _BodyState extends State<Body> {
                     ),
                   ),
                 ),
-                Spacer(),
-                _cameraButton(),
               ],
             ),
           )
@@ -217,7 +216,7 @@ class _BodyState extends State<Body> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 100, horizontal: 50),
+      padding: EdgeInsets.symmetric(vertical: 50, horizontal: 50),
       child: Image.asset(
         "assets/images/scan3.png",
       ),
@@ -226,7 +225,9 @@ class _BodyState extends State<Body> {
 
   Widget _cameraButton() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 20),
+      height: 100,
+      alignment: Alignment.center,
+      color: Colors.black,
       child: Row(
         children: [
           Spacer(
