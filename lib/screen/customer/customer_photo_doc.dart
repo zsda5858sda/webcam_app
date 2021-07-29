@@ -300,9 +300,9 @@ class _BodyState extends State<Body> {
       Fluttertoast.showToast(
           msg: "相片儲存於$newPath",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.black87,
           textColor: Colors.white,
           fontSize: 20.0);
     }

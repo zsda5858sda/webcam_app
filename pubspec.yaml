@@ -38,6 +38,7 @@ dependencies:
   cloud_firestore: ^2.3.0
   rxdart: ^0.27.1
   fluttertoast: ^8.0.7
+  double_back_to_close_app: ^2.0.1
 
 dev_dependencies:
   flutter_test:

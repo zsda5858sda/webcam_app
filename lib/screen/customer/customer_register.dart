@@ -117,7 +117,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                                   .subscribeToTopic('customer');
                               await showAlertDialog(
                                   context, "登入成功", "將跳轉至功能首頁");
-                              Navigator.pushNamed(
+                              Navigator.popAndPushNamed(
                                   context, CustomerOptionsScreen.routeName);
                             } else {
                               showAlertDialog(context, "", "驗證碼錯誤");

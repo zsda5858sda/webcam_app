@@ -47,13 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
       ResponsiveApp.setMq(context);
-      return WillPopScope(
-        onWillPop: () async {
-          return true;
-        },
-        child: Scaffold(
-          appBar: homeAppBar(),
-          body: SingleChildScrollView(
+      return Scaffold(
+        appBar: homeAppBar(),
+        body: DoubleBackToCloseApp(
+          snackBar: const SnackBar(
+            content: Text('Tap back again to leave'),
+          ),
+          child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 SizedBox(
