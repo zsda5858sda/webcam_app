@@ -20,6 +20,7 @@ Future<void> login(String uid, String password) async {
       'Content-Type': 'application/json; charset=UTF-8'
     },
   ).then((response) {
+    print(response.statusCode);
     if (!response.body.contains("success")) throw Exception("|帳號或密碼錯誤");
   });
 }

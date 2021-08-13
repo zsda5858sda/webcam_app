@@ -17,32 +17,30 @@ class ScreenButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(15),
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
                   child: Container(
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: <Color>[
-                          Color(0xFF0D47A1),
-                          Color(0xFF1976D2),
-                          Color(0xFF42A5F5),
-                        ],
-                      ),
+                      color: Color(0xFFD5E8F2),
                     ),
                   ),
                 ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.all(16.0),
-                    primary: Colors.white,
-                    textStyle: const TextStyle(fontSize: 20),
+                SizedBox(
+                  width: 200.0,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.all(16.0),
+                      primary: Color(0xFF305E75),
+                      textStyle: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      onPressed();
+                    },
+                    child: Text(btnName),
                   ),
-                  onPressed: () {
-                    onPressed();
-                  },
-                  child: Text(btnName),
                 ),
               ],
             ),

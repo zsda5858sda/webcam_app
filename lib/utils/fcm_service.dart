@@ -12,6 +12,7 @@ class FCMService {
   }
 
   static Future<void> sendToCustomer(String token, String agentId) async {
+    print("Sending message");
     await http.post(
       Uri.parse(Config.FCM_SEND),
       headers: <String, String>{

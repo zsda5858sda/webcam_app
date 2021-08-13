@@ -5,28 +5,37 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:webcam_app/database/dao/userDao.dart';
+import 'package:webcam_app/database/model/user.dart';
+import 'package:webcam_app/screen/component/alert_btn.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:camera/camera.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
-import 'package:webcam_app/database/dao/userDao.dart';
+import 'package:webcam_app/screen/component/request_btn.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/upload/upload_item.dart';
 import 'package:webcam_app/utils/response_app.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 const String title = 'FileUpload Sample app';
-final Uri uploadURL = Uri.parse(
-  'https://vsid.ubt.ubot.com.tw:81/uploadpic',
+final Uri uploadPicUrl = Uri.parse(
+  'http://172.20.10.10:8080/upload',
 );
+FlutterUploader _uploader = FlutterUploader();
+var uploadVideoUrl = Uri.parse("http://172.20.10.10:8080/uploadVideo");
+
 var hintText;
 var hintContent;
 var photoState = 1;
 
 class CustomerPhotoScreen extends StatefulWidget {
-  CustomerPhotoScreen({Key? key}) : super(key: key);
+  CustomerPhotoScreen({Key? key, required this.agentId}) : super(key: key);
+  final String agentId;
   static const String routeName = "/photo";
   @override
   _CustomerPhotoScreen createState() => _CustomerPhotoScreen();
@@ -36,7 +45,12 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
   @override
   void initState() {
     super.initState();
-
+    EasyLoading.addStatusCallback((status) {
+      print('EasyLoading Status $status');
+      if (status == EasyLoadingStatus.dismiss) {
+        print('cancel');
+      }
+    });
     var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     var initializationSettingsAndroid =
         AndroidInitializationSettings('ic_upload');
@@ -64,18 +78,26 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
       child: Scaffold(
           backgroundColor: Color(0xFF63BED0),
           body: Body(
-            uploadURL: uploadURL,
+            agentId: widget.agentId,
+            uploadURL: uploadVideoUrl,
+            customerWebRtcUrl: Uri.parse(
+                "https://172.20.10.10:82/main/client/index.html?openExternalBrowser=1&agentid=" +
+                    widget.agentId),
           )),
     );
   }
 }
 
 class Body extends StatefulWidget {
-  const Body({
-    Key? key,
-    required this.uploadURL,
-  }) : super(key: key);
+  const Body(
+      {Key? key,
+      required this.uploadURL,
+      required this.customerWebRtcUrl,
+      required this.agentId})
+      : super(key: key);
   final Uri uploadURL;
+  final Uri customerWebRtcUrl;
+  final String agentId;
 
   @override
   _BodyState createState() => _BodyState();
@@ -88,6 +110,9 @@ class _BodyState extends State<Body> {
   CameraController? controller;
   List<CameraDescription>? cameras;
   var imagePath;
+  var userId;
+  var filePaths = [];
+  var fileNames = [];
   final Size size = ResponsiveApp().mq.size;
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
@@ -96,6 +121,8 @@ class _BodyState extends State<Body> {
     cameras = await availableCameras();
     if (cameras != null) {
       controller = CameraController(cameras![0], ResolutionPreset.medium);
+      DeviceOrientation? deviceOrientation;
+      controller!.lockCaptureOrientation(deviceOrientation);
       controller!.initialize().then((_) {
         if (!mounted) {
           return;
@@ -107,6 +134,7 @@ class _BodyState extends State<Body> {
 
   @override
   void initState() {
+    getUserid();
     super.initState();
     _camera();
   }
@@ -261,25 +289,21 @@ class _BodyState extends State<Body> {
   Future takePicture() async {
     final ppp = await controller!.takePicture();
     String filePath = ppp.path;
-    String fileName = '0000915-A123456789-$photoState.jpg';
+    String fileName = widget.agentId.toString() +
+        '-' +
+        userId.toString() +
+        '-$photoState.jpg';
     String newPath = path.join(path.dirname(filePath), fileName);
     File(filePath).renameSync(newPath);
     if (photoState <= 3) {
-      imagePath = newPath;
-      File file = File(imagePath);
-      Uint8List bytes = file.readAsBytesSync();
-      List<int> imageData = bytes.buffer.asUint8List();
-      await _buildUpload(imageData, fileName)
-          .then((Response<dynamic> response) {
-        if (response.statusCode == 200) {
-          showAlertDialog(context);
-        }
-      });
+      filePaths.add(newPath);
+      fileNames.add(fileName);
+      showAlertDialog(context);
     }
   }
 
   Future<Response<dynamic>> _buildUpload(List<int> imageData, String fileName) {
-    var url = widget.uploadURL;
+    var url = uploadPicUrl;
 
     MultipartFile multipartFile = MultipartFile.fromBytes(
       imageData,
@@ -287,9 +311,12 @@ class _BodyState extends State<Body> {
       contentType: MediaType('image', 'jpg'),
     );
     FormData formData = FormData.fromMap({
-      "uploaded_file": multipartFile,
+      "file": multipartFile,
     });
-    return Dio().post(url.toString(), data: formData);
+    return Dio().post(
+      url.toString(),
+      data: formData,
+    );
   }
 
   void checkResponse() {
@@ -303,36 +330,87 @@ class _BodyState extends State<Body> {
     // Init
     AlertDialog dialog = AlertDialog(
       title: Row(children: [
-        Icon(
-          Icons.cloud_done,
-          color: Colors.green,
-        ),
-        Text('上傳成功')
+        Container(
+            width: size.width * 0.6,
+            height: 40,
+            margin: EdgeInsets.only(left: 5),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                color: Color(0xFF0099E9)),
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                "拍攝完成",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
+              ),
+            ))
       ]),
-      content: Text(hintContent),
+      content: Text(
+        hintContent,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ),
       actions: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FlatButton(
-                child: Text("確認"),
-                onPressed: () async {
-                  setState(() {
+            AlertBtn(
+                size: size * 0.1,
+                btnName: "確認",
+                onPress: () async {
+                  if (photoState < 3) {
                     photoState++;
-                  });
-                  if (photoState > 3) {
-                    final userDao = UserDao.instance;
-                    final url = (await userDao.readAllNotes()).first.webviewUrl;
-                    Navigator.pushNamed(context, CustomerWebRTC.routeName,
-                        arguments: {"url": url});
-                  } else {
+                    print(fileNames);
+                    print(filePaths);
                     Navigator.pop(context);
+                  } else {
+                    int count = 1;
+                    print('準備跳頁');
+                    print(fileNames);
+                    print(filePaths);
+                    Navigator.pop(context);
+                    for (int i = 0; i < fileNames.length; i++) {
+                      File file = File(filePaths[i]);
+                      Uint8List bytes = file.readAsBytesSync();
+                      List<int> imageData = bytes.buffer.asUint8List();
+                      await _buildUpload(imageData, fileNames[i])
+                          .then((Response<dynamic> response) async {
+                        if (response.statusCode == 200) {
+                          print("上傳成功！");
+                          File(filePaths[i]).deleteSync();
+                          await EasyLoading.show(
+                            status: '檔案上傳中',
+                            maskType: EasyLoadingMaskType.black,
+                          );
+                          count++;
+                        }
+                      });
+                    }
+                    await EasyLoading.showSuccess('上傳成功，即將進行視訊');
+                    Timer(Duration(seconds: 3), () async {
+                      await EasyLoading.dismiss();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => CustomerWebRTC(
+                                    uploader: _uploader,
+                                    uploadURL: widget.uploadURL,
+                                    customerWebRtcUrl: widget.customerWebRtcUrl,
+                                    agentId: widget.agentId,
+                                  )));
+                    });
                   }
                 }),
-            SizedBox(width: size.width * 0.05),
-            FlatButton(
-                child: Text("重拍"),
-                onPressed: () async {
+            SizedBox(width: size.width * 0.08),
+            AlertBtn(
+                size: size * 0.1,
+                btnName: "重拍",
+                onPress: () async {
+                  print(photoState);
+                  File(filePaths[photoState - 1]).deleteSync();
+                  fileNames.removeAt(photoState - 1);
+                  filePaths.removeAt(photoState - 1);
                   Navigator.pop(context);
                 }),
           ],
@@ -346,5 +424,21 @@ class _BodyState extends State<Body> {
         builder: (BuildContext context) {
           return dialog;
         });
+  }
+
+  Future getUserid() async {
+    List<User> userList = await UserDao.instance.readAllNotes();
+    debugPrint(userList.first.id);
+    userId = userList.first.id;
+  }
+
+  routeToCustomerWeb() {
+    MaterialPageRoute(
+        builder: (context) => CustomerWebRTC(
+              uploader: _uploader,
+              uploadURL: widget.uploadURL,
+              customerWebRtcUrl: widget.customerWebRtcUrl,
+              agentId: widget.agentId,
+            ));
   }
 }

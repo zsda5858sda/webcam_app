@@ -87,9 +87,12 @@ class _HBCheckCodeState extends State<HBCheckCode> {
             TextStyle(fontWeight: FontWeight.values[8], fontSize: 25))
         .width;
     return Container(
-        color: widget.backgroundColor,
         width: maxWidth > widget.width ? maxWidth : widget.width,
         height: widget.height,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
+            color: widget.backgroundColor),
         child: CustomPaint(
           painter: HBCheckCodePainter(drawData: drawData),
         ));

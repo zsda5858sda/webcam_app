@@ -16,7 +16,7 @@ import 'package:webcam_app/utils/response_app.dart';
 
 const String title = 'FileUpload Sample app';
 final Uri uploadURL = Uri.parse(
-  'https://vsid.ubt.ubot.com.tw:81/uploadpic',
+  'http://localhost:8080/upload',
 );
 var hintText;
 var hintContent;

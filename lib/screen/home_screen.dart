@@ -1,10 +1,11 @@
+import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
-import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
@@ -14,6 +15,9 @@ import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:animations/animations.dart';
+
+import 'component/home_screen_logo.dart';
 
 final BehaviorSubject<String?> selectNotificationSubject =
     BehaviorSubject<String?>();
@@ -29,13 +33,54 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  Size size = ResponsiveApp().mq.size;
+  late AnimationController _controller2;
+  late AnimationController _controller;
+
   @override
   void initState() {
-    super.initState();
-    _configureSelectNotificationSubject();
+     _configureSelectNotificationSubject();
     _configureFirebaseMessage();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    _controller2 = AnimationController(
+      value: 0.0,
+      duration: const Duration(milliseconds: 5000),
+      reverseDuration: const Duration(milliseconds: 10000000000),
+      vsync: this,
+    )..addStatusListener((AnimationStatus status) {
+        setState(() {
+          // setState needs to be called to trigger a rebuild because
+          // the 'HIDE FAB'/'SHOW FAB' button needs to be updated based
+          // the latest value of [_controller.status].
+        });
+      });
+    _controller = AnimationController(
+      value: 0.0,
+      duration: const Duration(milliseconds: 2000),
+      reverseDuration: const Duration(milliseconds: 100000),
+      vsync: this,
+    )..addStatusListener((AnimationStatus status) {
+        setState(() {
+          // setState needs to be called to trigger a rebuild because
+          // the 'HIDE FAB'/'SHOW FAB' button needs to be updated based
+          // the latest value of [_controller.status].
+        });
+      });
+    _controller.forward();
+    _controller2.forward();
+    super.initState();
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _configureSelectNotificationSubject();
+  //   _configureFirebaseMessage();
+  // }
 
   @override
   void dispose() {
@@ -47,40 +92,121 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
       ResponsiveApp.setMq(context);
-      return Scaffold(
-        appBar: homeAppBar(),
-        body: DoubleBackToCloseApp(
-          snackBar: const SnackBar(
-            content: Text('Tap back again to leave'),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
+      return WillPopScope(
+        onWillPop: () async {
+          return true;
+        },
+        child: Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                  Color(0xFF780D0C7),
+                  Color(0xFF74CACA),
+                  Color(0xFF55BBD2),
+                  Color(0xFF23A3E0),
+                  Color(0xFF0099E9),
+                ])),
+            child: new Stack(
               children: <Widget>[
-                SizedBox(
-                  height: 100,
+                Column(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: <Color>[
+                                Color(0xFF7dcfc8),
+                                Color(0xFF79ccc9),
+                                Color(0xFF70c8cb),
+                                Color(0xFF69c4cd),
+                              ])),
+                          child: FadeScaleTransition(
+                            animation: _controller,
+                            child: HomeScreenLogo(),
+                          )),
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: FadeScaleTransition(
+                          animation: _controller,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(color: Color(0xFF028da4)),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "視訊服務系統",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  letterSpacing: 6),
+                            ),
+                          ),
+                        )),
+                    Expanded(
+                        flex: 6,
+                        child: Container(
+                          height: 400,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: <Color>[
+                                Color(0xFF69c4cd),
+                                Color(0xFF4db7d4),
+                                Color(0xFF30a9dd),
+                                Color(0xFF22a3e0),
+                              ])),
+                        )),
+                  ],
                 ),
-                ScreenButton(
-                  btnName: "客戶端",
-                  onPressed: () async {
-                    List<User> userList = await UserDao.instance.readAllNotes();
-                    userList.length > 0
-                        ? Navigator.pushNamed(
-                            context, CustomerOptionsScreen.routeName)
-                        : Navigator.pushNamed(
-                            context, CustomerRegisterScreen.routeName);
-                    // final userDao = UserDao.instance;
-                    // final url = (await userDao.readAllNotes()).first.webviewUrl;
-                    // Navigator.pushNamed(context, CustomerWebRTC.routeName,
-                    //     arguments: {"url": url});
-                  },
+                FadeScaleTransition(
+                  animation: _controller2,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 15, right: 15, bottom: 40),
+                    decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30)),
+                        border: Border.all(width: 2.0, color: Colors.white)),
+                  ),
                 ),
-                SizedBox(
-                  height: 50,
-                ),
-                ScreenButton(
-                  btnName: "行員端",
-                  onPressed: () =>
-                      Navigator.pushNamed(context, ClerkLoginScreen.routeName),
+                Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height*0.65,
+                    ),
+                    ScreenButton(
+                      btnName: "貴賓專區",
+                      onPressed: () async {
+                        List<User> userList =
+                            await UserDao.instance.readAllNotes();
+                        userList.length > 0
+                            ? Navigator.pushNamed(
+                                context, CustomerOptionsScreen.routeName)
+                            : Navigator.pushNamed(
+                                context, CustomerRegisterScreen.routeName);
+                        // final userDao = UserDao.instance;
+                        // final url = (await userDao.readAllNotes()).first.webviewUrl;
+                        // Navigator.pushNamed(context, CustomerWebRTC.routeName,
+                        //     arguments: {"url": url});
+                      },
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    ScreenButton(
+                      btnName: "行員登入",
+                      onPressed: () => Navigator.pushNamed(
+                          context, ClerkLoginScreen.routeName),
+                    ),
+                  ],
                 ),
               ],
             ),

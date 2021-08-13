@@ -1,15 +1,25 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
+import 'package:webcam_app/screen/component/banner_pic.dart';
+import 'package:webcam_app/screen/component/custom_appbar.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
+import 'package:webcam_app/screen/component/input_box.dart';
+import 'package:webcam_app/screen/component/rich_text.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:webcam_app/utils/hbcode.dart';
 import 'package:webcam_app/utils/response_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
+
+final List<String> imgList = [
+  'assets/images/ＡＤ-1.png',
+  'assets/images/ＡＤ-2.png',
+  'assets/images/ＡＤ-3.png',
+];
 
 class CustomerRegisterScreen extends StatefulWidget {
   const CustomerRegisterScreen({Key? key}) : super(key: key);
@@ -28,115 +38,135 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: homeAppBar(),
-      body: Wrap(
-        spacing: 4.0,
-        runSpacing: 8.0,
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              Container(
-                height: size.height,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30)),
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/background.png"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: new Center(
-                  child: Column(
+    List<int> list = [1, 2, 3, 4, 5];
+    return new MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: new Scaffold(
+          body: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                    Color(0xFF780D0C7),
+                    Color(0xFF74CACA),
+                    Color(0xFF55BBD2),
+                    Color(0xFF23A3E0),
+                    Color(0xFF0099E9),
+                  ])),
+              child: new Stack(
+                children: <Widget>[
+                  BannerPic(size: size, imgList: imgList),
+                  CustomAppBar(size: size),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      SizedBox(
-                        height: size.height * 0.15,
-                      ),
                       Container(
-                        width: size.width * 0.8,
-                        child: TextField(
-                          controller: idController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: '請輸入身分證字號',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                              const Radius.circular(10.0),
-                            )),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: size.height * 0.07,
-                      ),
-                      Container(
-                        width: size.width * 0.8,
-                        child: TextField(
-                          controller: phoneController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: '請輸入電話號碼',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                              const Radius.circular(10.0),
-                            )),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: size.height * 0.04,
-                      ),
-                      HBCodeWidget(
-                        size: size,
-                        hbCodeController: hbCodeController,
-                      ),
-                      SizedBox(
-                        height: size.height * 0.26,
-                      ),
-                      ConstrainedBox(
-                        constraints:
-                            BoxConstraints.tightFor(width: 300, height: 50),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (HBCode.code == hbCodeController.text) {
-                              String id = idController.text;
-                              String phone = phoneController.text;
-                              String? token = await FCMService.getToken();
-                              addUserToFirestore(phone, token);
-                              addUserToLocalDB(id, phone);
-                              // subscribe to topic on each app start-up
-                              await FirebaseMessaging.instance
-                                  .subscribeToTopic('customer');
-                              await showAlertDialog(
-                                  context, "登入成功", "將跳轉至功能首頁");
-                              Navigator.popAndPushNamed(
-                                  context, CustomerOptionsScreen.routeName);
-                            } else {
-                              showAlertDialog(context, "", "驗證碼錯誤");
-                            }
-                          },
-                          child: RichText(
-                            text: TextSpan(
-                                style: TextStyle(fontSize: 20), text: '註冊'),
-                          ),
-                        ),
-                      ),
+                          margin: EdgeInsets.only(left: 15, right: 15),
+                          height: size.height * 0.37,
+                          decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(30),
+                                  topRight: Radius.circular(30))),
+                          child: Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: size.height * 0.02,
+                              ),
+                              SmallTitle(title: "請輸入身分證"),
+                              InputBox(
+                                showText: true,
+                                  size: size,
+                                  idController: idController,
+                                  HintText: "請輸入身分證"),
+                              SizedBox(
+                                height: size.height * 0.01,
+                              ),
+                              SmallTitle(title: "請輸入電話號碼"),
+                              InputBox(
+                                showText: true,
+                                  size: size,
+                                  idController: phoneController,
+                                  HintText: "請輸入電話號碼"),
+                              SizedBox(
+                                height: size.height * 0.01,
+                              ),
+                              SmallTitle(title: "驗證碼"),
+                              HBCodeWidget(
+                                size: size,
+                                hbCodeController: hbCodeController,
+                              ),
+                              SizedBox(
+                                height: size.height * 0.01,
+                              ),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                    maxHeight: 60,
+                                    minHeight: 40,
+                                    minWidth: size.width * 0.68),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20)),
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: <Color>[
+                                              Color(0xFF80d0c7),
+                                              Color(0xFF775caca),
+                                              Color(0xFF5cbed0),
+                                              Color(0xFF2ba6de),
+                                              Color(0xFF0d9ce6),
+                                              Color(0xFF0199e8),
+                                            ])),
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.all(16.0),
+                                        primary: Color(0xFF5991ae),
+                                      ),
+                                      onPressed: () async {
+                                        if (HBCode.code ==
+                                            hbCodeController.text) {
+                                          String id = idController.text;
+                                          String phone = phoneController.text;
+                                          String? token =
+                                              await FCMService.getToken();
+                                          addUserToFirestore(phone, token);
+                                          addUserToLocalDB(id, phone);
+                                          await showAlertDialog(
+                                              context, "登入成功", "將跳轉至功能首頁");
+                                          Navigator.pushNamed(context,
+                                              CustomerOptionsScreen.routeName);
+                                        } else {
+                                          showAlertDialog(context, "", "驗證碼錯誤");
+                                        }
+                                      },
+                                      child: Text(
+                                        "註冊",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            letterSpacing: 20,
+                                            fontSize: 20),
+                                      ),
+                                    )),
+                              )
+                            ],
+                          )),
                     ],
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+                  )
+                ],
+              ))),
     );
   }
 

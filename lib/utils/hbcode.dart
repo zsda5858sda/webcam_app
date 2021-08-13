@@ -5,7 +5,7 @@ class HBCode {
 
   static String getCode() {
     code = "";
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 4; i++) {
       code = code + Random().nextInt(9).toString();
     }
     return code;

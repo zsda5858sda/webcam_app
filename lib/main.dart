@@ -1,11 +1,11 @@
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
@@ -13,21 +13,19 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
-import 'package:webcam_app/screen/clerk/clerk_push_message.dart';
 import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
-import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_manual.dart';
-import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+import 'package:device_info/device_info.dart';
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
 FlutterUploader _uploader = FlutterUploader();
-var uploadUrl = "https://vsid.ubt.ubot.com.tw:81/uploadvideo";
+var uploadUrl = "http://172.20.10.10:8080/uploadVideo";
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
@@ -44,8 +42,17 @@ Future<void> main() async {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
   await Permission.storage.request();
+  await Permission.manageExternalStorage.request();
   await Permission.camera.request();
   await Permission.microphone.request();
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  if (Platform.isIOS) {
+    IosDeviceInfo iosDeviceInfo = await deviceInfo.iosInfo;
+    print('Is simulator: ${iosDeviceInfo.isPhysicalDevice}');
+  } else if (Platform.isAndroid) {
+    AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
+    print('Is physical device: ${androidDeviceInfo.isPhysicalDevice}');
+  }
 
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -103,7 +110,6 @@ Future<void> main() async {
             android: initializationSettingsAndroid,
             iOS: initializationSettingsIOS,
             macOS: initializationSettingsMacOS);
-
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (String? payload) async {
       if (payload != null) {
@@ -112,34 +118,77 @@ Future<void> main() async {
       selectNotificationSubject.add(payload);
     });
   }
-
+  configLoading();
   runApp(MyApp());
+}
+
+void configLoading() {
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.dark
+    ..indicatorSize = 50.0
+    ..radius = 15.0
+    ..progressColor = Colors.yellow
+    ..backgroundColor = Colors.green
+    ..indicatorColor = Colors.yellow
+    ..textColor = Colors.yellow
+    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..userInteractions = true
+    ..dismissOnTap = false;
+}
+
+class SplashPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF333333),
+      body: Center(child: Image(image: AssetImage("assets/images/ubLogo.png"))),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: '視訊系統',
-      home: HomeScreen(
-        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        channel: channel,
-      ),
-      routes: {
-        CustomerRegisterScreen.routeName: (context) => CustomerRegisterScreen(),
-        CustomerOptionsScreen.routeName: (context) => CustomerOptionsScreen(),
-        CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
-        CustomerWebRTC.routeName: (context) => CustomerWebRTC(
-            uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
-        CustomerMaunalScreen.routeName: (context) => CustomerMaunalScreen(),
-        CustomerPhotoDocScreen.routeName: (context) => CustomerPhotoDocScreen(),
-        ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
-        ClerkPushMessageScreen.routeName: (context) => ClerkPushMessageScreen(),
-        fileUpload.routeName: (context) => fileUpload()
-      },
-    );
+    return FutureBuilder(
+        future: Future.delayed(Duration(seconds: 2)),
+        builder: (context, AsyncSnapshot snapshot) {
+          // if (snapshot.connectionState == ConnectionState.waiting) {
+          //   return MaterialApp(debugShowCheckedModeBanner: false,home: SplashPage());
+          // } else {
+          // Loading is done, return the app:
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: '視訊系統',
+            // theme: new ThemeData(b ),
+            home: HomeScreen(
+              flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+              channel: channel,
+            ),
+            builder: EasyLoading.init(),
+            routes: {
+              CustomerRegisterScreen.routeName: (context) =>
+                  CustomerRegisterScreen(),
+              CustomerOptionsScreen.routeName: (context) =>
+                  CustomerOptionsScreen(),
+              // CustomerPhotoScreen.routeName: (context) =>
+              //     CustomerPhotoScreen(),
+              // CustomerWebRTC.routeName: (context) => CustomerWebRTC(
+              //     uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
+              CustomerMaunalScreen.routeName: (context) =>
+                  CustomerMaunalScreen(),
+              CustomerPhotoDocScreen.routeName: (context) =>
+                  CustomerPhotoDocScreen(),
+              ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
+
+              fileUpload.routeName: (context) => fileUpload()
+            },
+          );
+        }
+        // }
+        );
   }
 }
 

@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as path;
 import 'package:webcam_app/screen/server_behavior.dart';
+import 'package:webcam_app/screen/upload/file_upload.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({
@@ -30,7 +31,6 @@ class _UploadScreenState extends State<UploadScreen> {
   ImagePicker imagePicker = ImagePicker();
 
   ServerBehavior _serverBehavior = ServerBehavior.defaultOk200;
-
   @override
   void initState() {
     super.initState();
@@ -175,6 +175,7 @@ class _UploadScreenState extends State<UploadScreen> {
     ));
 
     widget.onUploadStarted();
+    widget.uploader.result.listen((event) {});
   }
 
   Upload _buildUpload(bool binary, List<String> paths) {
