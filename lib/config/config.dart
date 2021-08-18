@@ -1,5 +1,6 @@
 class Config {
-  static final String LOGIN = "https://vsid.ubt.ubot.com.tw:91/getAD";
+  static final String LOGIN =
+      "https://vsid66.ubt.ubot.com.tw:91/webcam_api/getAD";
   static final String FCM_SEND = "https://fcm.googleapis.com/fcm/send";
   static final String FCM_VAPID_KEY =
       "BOa5kaeCiN4BmjKzLsitUL6p2lMY3KJoJx2ksW2pMnEw61lDEAHdqGTSAYkoFGESIzJDtiOKsycj3JIrTUL-yh4";
