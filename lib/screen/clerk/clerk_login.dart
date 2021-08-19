@@ -177,9 +177,14 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                                         onPress: () async {
                                           if (HBCode.code ==
                                               hbCodeController.text) {
-                                            await login(idController.text,
+                                            var uid = idController.text;
+                                            var message;
+                                            await HttpUtils()
+                                                .login(uid,
                                                     passwordController.text)
-                                                .then((_) async {
+                                                .then((String result) async {
+                                              message = result;
+
                                               await showAlertDialog(
                                                   context, "登入成功", "將跳轉至推播頁面");
                                               setState(() {
@@ -192,6 +197,8 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                                               showAlertDialog(
                                                   context, "登入失敗", message);
                                             });
+                                            await HttpUtils()
+                                                .sendLog(uid, message, "1");
                                           } else {
                                             await showAlertDialog(
                                                 context, "登入失敗", "驗證碼錯誤");
@@ -252,32 +259,37 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                                   size: size,
                                   btnName: "發送推播",
                                   onPress: () async {
-                                    String token = '';
-                                    final DocumentReference document =
-                                        FirebaseFirestore.instance
-                                            .collection("users")
-                                            .doc(phoneController.text);
-                                    await document.get().then<dynamic>(
-                                        (DocumentSnapshot snapshot) async {
-                                      Map<String, dynamic> data = snapshot
-                                          .data() as Map<String, dynamic>;
-                                      token = data['token'];
-                                    });
+                                    String phone = phoneController.text;
                                     List<Clerk> clerk =
                                         await ClerkDao.instance.readAllNotes();
-                                    print(token);
-                                    print(clerk.first.account.toString());
-                                    print("---------------");
-                                    FCMService.sendToCustomer(
-                                        token, clerk.first.account);
+                                    try {
+                                      var response =
+                                          await HttpUtils().getToken(phone);
+                                      String token = response["data"];
+                                      String message = response["message"];
+                                      HttpUtils().sendLog(
+                                          clerk.first.account.toString(),
+                                          message,
+                                          "1");
+                                      print(token);
+                                      print(clerk.first.account.toString());
+                                      print("---------------");
+                                      FCMService.sendToCustomer(
+                                          token, clerk.first.account);
+                                      showAlertDialog(context, "推播成功", "已傳送通知");
+                                    } on Exception catch (error) {
+                                      await HttpUtils().sendLog(
+                                          clerk.first.account.toString(),
+                                          error.toString(),
+                                          "1");
+                                      showAlertDialog(
+                                          context, "推播失敗", error.toString());
+                                    }
                                   },
                                 ),
                                 SizedBox(
                                   height: size.height * 0.03,
                                 ),
-                                // SizedBox(
-                                //   height: size.height * 0.03,
-                                // ),
                                 RequestBtn(
                                   size: size,
                                   btnName: "進行視訊",
@@ -289,8 +301,8 @@ class _ClerkLoginScreenState extends State<ClerkLoginScreen> {
                                               agentId: "0000915",
                                               uploader: _uploader,
                                               uploadURL: uploadVideoUrl,
-                                              webRtcUrl: Uri.parse(
-                                                  webRtcUrl + idController.text),
+                                              webRtcUrl: Uri.parse(webRtcUrl +
+                                                  idController.text),
                                             )),
                                   ),
                                 )
