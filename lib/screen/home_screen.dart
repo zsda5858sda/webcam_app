@@ -12,7 +12,7 @@ import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:animations/animations.dart';
@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void initState() {
-     _configureSelectNotificationSubject();
+    _configureSelectNotificationSubject();
     _configureFirebaseMessage();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Column(
                   children: <Widget>[
                     SizedBox(
-                      height: MediaQuery.of(context).size.height*0.65,
+                      height: MediaQuery.of(context).size.height * 0.65,
                     ),
                     ScreenButton(
                       btnName: "貴賓專區",
@@ -192,10 +192,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 context, CustomerOptionsScreen.routeName)
                             : Navigator.pushNamed(
                                 context, CustomerRegisterScreen.routeName);
-                        // final userDao = UserDao.instance;
-                        // final url = (await userDao.readAllNotes()).first.webviewUrl;
-                        // Navigator.pushNamed(context, CustomerWebRTC.routeName,
-                        //     arguments: {"url": url});
                       },
                     ),
                     SizedBox(
