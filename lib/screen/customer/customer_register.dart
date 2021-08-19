@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,8 @@ import 'package:webcam_app/screen/component/rich_text.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:webcam_app/utils/hbcode.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/http_utils.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 final List<String> imgList = [

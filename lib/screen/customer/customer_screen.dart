@@ -9,7 +9,7 @@ import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/button.dart';
 import 'package:webcam_app/screen/component/hb_widget.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class CustomerScreen extends StatefulWidget {

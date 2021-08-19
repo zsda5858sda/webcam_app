@@ -1,20 +1,12 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery_saver/files.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/banner_pic.dart';
 import 'package:webcam_app/screen/component/custom_appbar.dart';
 import 'package:webcam_app/screen/component/input_box.dart';
 import 'package:webcam_app/screen/component/request_btn.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 

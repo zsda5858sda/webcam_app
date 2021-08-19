@@ -12,7 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/main.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 
 const String title = 'FileUpload Sample app';
 final Uri uploadURL = Uri.parse(

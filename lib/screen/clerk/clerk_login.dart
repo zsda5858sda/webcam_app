@@ -12,8 +12,8 @@ import 'package:webcam_app/screen/component/rich_text.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:webcam_app/utils/hbcode.dart';
-import 'package:webcam_app/utils/login.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/http_utils.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 import 'package:select_form_field/select_form_field.dart';
 

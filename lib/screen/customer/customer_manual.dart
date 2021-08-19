@@ -3,7 +3,7 @@ import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
 
 class CustomerMaunalScreen extends StatelessWidget {

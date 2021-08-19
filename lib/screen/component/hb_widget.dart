@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webcam_app/utils/hb_check_code.dart';
 import 'package:webcam_app/utils/hbcode.dart';
-import 'package:webcam_app/utils/response_app.dart';
+import 'package:webcam_app/utils/responsive_app.dart';
 
 class HBCodeWidget extends StatefulWidget {
   const HBCodeWidget(
