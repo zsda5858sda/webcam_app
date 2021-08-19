@@ -35,13 +35,14 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   final hbCodeController = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   Size size = ResponsiveApp().mq.size;
+  bool _validate = false;
   @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   @override
@@ -86,7 +87,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                               ),
                               SmallTitle(title: "請輸入身分證"),
                               InputBox(
-                                showText: true,
+                                  showText: true,
                                   size: size,
                                   idController: idController,
                                   HintText: "請輸入身分證"),
@@ -95,7 +96,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                               ),
                               SmallTitle(title: "請輸入電話號碼"),
                               InputBox(
-                                showText: true,
+                                  showText: true,
                                   size: size,
                                   idController: phoneController,
                                   HintText: "請輸入電話號碼"),
@@ -142,12 +143,28 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                                           String phone = phoneController.text;
                                           String? token =
                                               await FCMService.getToken();
-                                          addUserToFirestore(phone, token);
-                                          addUserToLocalDB(id, phone);
-                                          await showAlertDialog(
-                                              context, "登入成功", "將跳轉至功能首頁");
-                                          Navigator.pushNamed(context,
-                                              CustomerOptionsScreen.routeName);
+                                          try {
+                                            if (id.isEmpty || phone.isEmpty) {
+                                              throw new NullThrownError();
+                                            }
+
+                                            await register(id, phone, token);
+                                            addUserToLocalDB(id, phone);
+                                            await showAlertDialog(
+                                                context, "註冊成功", "將跳轉至功能首頁");
+                                            Navigator.pushNamed(
+                                                context,
+                                                CustomerOptionsScreen
+                                                    .routeName);
+                                          } on NullThrownError catch (_) {
+                                            await showAlertDialog(
+                                                context, "註冊失敗", "身分證或電話不能為空值");
+                                          } on Exception catch (error) {
+                                            await showAlertDialog(context,
+                                                "註冊失敗", error.toString());
+                                            HttpUtils().sendLog(
+                                                id, error.toString(), "2");
+                                          }
                                         } else {
                                           showAlertDialog(context, "", "驗證碼錯誤");
                                         }
@@ -179,9 +196,8 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
     UserDao.instance.insert(user);
   }
 
-  void addUserToFirestore(phone, token) {
-    DocumentReference<Map<String, dynamic>> users =
-        FirebaseFirestore.instance.collection('users').doc(phone);
-    users.set({"token": token});
+  Future<void> register(id, phone, token) async {
+    String result = await HttpUtils().register(id, phone, token);
+    await HttpUtils().sendLog(phone, result, "2");
   }
 }
