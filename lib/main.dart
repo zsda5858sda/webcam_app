@@ -13,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
+import 'package:webcam_app/screen/customer/customer_photo.dart';
 import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
@@ -21,6 +22,7 @@ import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:device_info/device_info.dart';
+import 'package:webcam_app/utils/fcm_service.dart';
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
@@ -55,6 +57,7 @@ Future<void> main() async {
   }
 
   await Firebase.initializeApp();
+  await FCMService.getToken();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   _uploader.setBackgroundHandler(backgroundHandler);
   await initPlatformState();
@@ -173,12 +176,9 @@ class MyApp extends StatelessWidget {
                   CustomerRegisterScreen(),
               CustomerOptionsScreen.routeName: (context) =>
                   CustomerOptionsScreen(),
-              // CustomerPhotoScreen.routeName: (context) =>
-              //     CustomerPhotoScreen(),
+              CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
               // CustomerWebRTC.routeName: (context) => CustomerWebRTC(
               //     uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
-              CustomerMaunalScreen.routeName: (context) =>
-                  CustomerMaunalScreen(),
               CustomerPhotoDocScreen.routeName: (context) =>
                   CustomerPhotoDocScreen(),
               ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
