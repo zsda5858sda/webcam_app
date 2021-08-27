@@ -18,7 +18,7 @@ class RequestBtn extends StatelessWidget {
       constraints: BoxConstraints(
           maxHeight: 50, minHeight: 40, minWidth: size.width * 0.68),
       child: Container(
-          height: 40,
+          height: size.height*0.055,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(20)),
               gradient: LinearGradient(
