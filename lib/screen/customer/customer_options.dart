@@ -125,13 +125,9 @@ class _CustomerOptionsScreen extends State<CustomerOptionsScreen> {
                                             User user = User.fromJson(userJson);
                                             await userDao.update(user);
 
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        CustomerPhotoScreen(
-                                                          agentId: agentId,
-                                                        )));
+                                            Navigator.pushNamed(context,
+                                                CustomerPhotoScreen.routeName,
+                                                arguments: CustomerPhotoArguments(agentId));
                                           }
                                         },
                                       )

@@ -11,12 +11,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/alert_btn.dart';
-import 'package:webcam_app/screen/component/app_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:camera/camera.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
-import 'package:webcam_app/screen/component/request_btn.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/upload/upload_item.dart';
 import 'package:webcam_app/utils/responsive_app.dart';
@@ -33,9 +31,14 @@ var hintText;
 var hintContent;
 var photoState = 1;
 
-class CustomerPhotoScreen extends StatefulWidget {
-  CustomerPhotoScreen({Key? key, required this.agentId}) : super(key: key);
+class CustomerPhotoArguments {
   final String agentId;
+
+  CustomerPhotoArguments(this.agentId);
+}
+
+class CustomerPhotoScreen extends StatefulWidget {
+  CustomerPhotoScreen({Key? key}) : super(key: key);
   static const String routeName = "/photo";
   @override
   _CustomerPhotoScreen createState() => _CustomerPhotoScreen();
@@ -71,6 +74,10 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as CustomerPhotoArguments;
+    String agentId = args.agentId;
+
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -78,11 +85,11 @@ class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
       child: Scaffold(
           backgroundColor: Color(0xFF63BED0),
           body: Body(
-            agentId: widget.agentId,
+            agentId: agentId,
             uploadURL: uploadVideoUrl,
             customerWebRtcUrl: Uri.parse(
                 "https://172.20.10.10:82/main/client/index.html?openExternalBrowser=1&agentid=" +
-                    widget.agentId),
+                    agentId),
           )),
     );
   }
