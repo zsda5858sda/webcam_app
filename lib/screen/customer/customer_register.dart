@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/banner_pic.dart';
@@ -10,10 +14,13 @@ import 'package:webcam_app/screen/component/input_box.dart';
 import 'package:webcam_app/screen/component/rich_text.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
+import 'package:http/http.dart' as http;
 import 'package:webcam_app/utils/hbcode.dart';
 import 'package:webcam_app/utils/http_utils.dart';
 import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:webcam_app/utils/show_dialog_alert.dart';
+import 'package:flutter_js/flutter_js.dart';
+import 'package:flutter_js/flutter_js.dart';
 
 final List<String> imgList = [
   'assets/images/ＡＤ-1.png',
@@ -33,9 +40,12 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final hbCodeController = TextEditingController();
+  final JavascriptRuntime jsRuntime = getJavascriptRuntime();
+
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   Size size = ResponsiveApp().mq.size;
   bool _validate = false;
+  bool idFormat = false;
   @override
   void initState() {
     super.initState();
@@ -83,23 +93,52 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                           child: Column(
                             children: <Widget>[
                               SizedBox(
-                                height: size.height * 0.02,
+                                height: size.height * 0.04,
                               ),
-                              SmallTitle(title: "請輸入身分證"),
                               InputBox(
-                                  showText: true,
-                                  size: size,
-                                  idController: idController,
-                                  HintText: "請輸入身分證"),
+                                isCorrect: !idFormat,
+                                showText: true,
+                                size: size,
+                                idController: idController,
+                                HintText: "請輸入身分證",
+                                verify: () {},
+                              ),
+                              Visibility(
+                                child: SmallTitle(title: "證件格式錯誤"),
+                                visible: idFormat,
+                              ),
                               SizedBox(
                                 height: size.height * 0.01,
                               ),
-                              SmallTitle(title: "請輸入電話號碼"),
                               InputBox(
-                                  showText: true,
+                                  isCorrect: true,
                                   size: size,
                                   idController: phoneController,
-                                  HintText: "請輸入電話號碼"),
+                                  HintText: "請輸入電話號碼",
+                                  showText: true,
+                                  verify: () async {
+                                    String blocJs = await rootBundle
+                                        .loadString("assets/js/ajv.js");
+                                    String cId = idController.text;
+                                    var asyncResult =
+                                        await jsRuntime.evaluateAsync(
+                                            blocJs + """ mixCheck("$cId")""");
+                                    jsRuntime.executePendingJob();
+                                    final promiseResolved = await jsRuntime
+                                        .handlePromise(asyncResult);
+                                    if (promiseResolved.stringResult
+                                        .contains("validateResult: true")) {
+                                      print("身分證格式正確");
+                                      setState(() {
+                                        idFormat = false;
+                                      });
+                                    } else {
+                                      print("身分證格式錯誤");
+                                      setState(() {
+                                        idFormat = true;
+                                      });
+                                    }
+                                  }),
                               SizedBox(
                                 height: size.height * 0.01,
                               ),
