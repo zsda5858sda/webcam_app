@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
@@ -8,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/component/alert_btn.dart';
@@ -17,19 +20,23 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/upload/upload_item.dart';
+import 'package:http/http.dart' as http;
 import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 const String title = 'FileUpload Sample app';
-final Uri uploadPicUrl = Uri.parse(
-  'http://172.20.10.10:8080/upload',
-);
+final Uri uploadPicUrl = Uri.parse(Config.uploadPic);
 FlutterUploader _uploader = FlutterUploader();
-var uploadVideoUrl = Uri.parse("http://172.20.10.10:8080/uploadVideo");
+var uploadVideoUrl = Uri.parse(Config.uploadPic);
 
 var hintText;
 var hintContent;
 var photoState = 1;
+var now = DateTime.now();
+var year = now.year.toString();
+var month = now.month < 10 ? "0" + now.month.toString() : now.month.toString();
+var day = now.day < 10 ? "0" + now.day.toString() : now.day.toString();
+var datetime = year + month + day;
 
 class CustomerPhotoArguments {
   final String agentId;
@@ -47,6 +54,7 @@ class CustomerPhotoScreen extends StatefulWidget {
 class _CustomerPhotoScreen extends State<CustomerPhotoScreen> {
   @override
   void initState() {
+    photoState = 1;
     super.initState();
     EasyLoading.addStatusCallback((status) {
       print('EasyLoading Status $status');
@@ -294,11 +302,20 @@ class _BodyState extends State<Body> {
 
   // var imageList = <String>[];
   Future takePicture() async {
+    var now = DateTime.now();
+    var year = now.year.toString();
+    var month =
+        now.month < 10 ? "0" + now.month.toString() : now.month.toString();
+    var day = now.day < 10 ? "0" + now.day.toString() : now.day.toString();
+    var datetime = year + month + day;
+
     final ppp = await controller!.takePicture();
     String filePath = ppp.path;
     String fileName = widget.agentId.toString() +
         '-' +
         userId.toString() +
+        '-' +
+        datetime +
         '-$photoState.jpg';
     String newPath = path.join(path.dirname(filePath), fileName);
     File(filePath).renameSync(newPath);
@@ -378,12 +395,25 @@ class _BodyState extends State<Body> {
                     print(fileNames);
                     print(filePaths);
                     Navigator.pop(context);
+                    await createFile(widget.agentId +
+                        '-' +
+                        userId +
+                        "-" +
+                        datetime.toString() +
+                        "-location.txt");
                     for (int i = 0; i < fileNames.length; i++) {
                       File file = File(filePaths[i]);
+                      print(fileNames.length);
                       Uint8List bytes = file.readAsBytesSync();
                       List<int> imageData = bytes.buffer.asUint8List();
                       await _buildUpload(imageData, fileNames[i])
                           .then((Response<dynamic> response) async {
+                        print("回傳訊息" + response.toString());
+                        Map<String, dynamic> json =
+                            jsonDecode(response.toString());
+                        String data = json['message'];
+                        print(data);
+                        // await HttpUtils().sendLog(userId, data, "1");
                         if (response.statusCode == 200) {
                           print("上傳成功！");
                           File(filePaths[i]).deleteSync();
@@ -408,6 +438,7 @@ class _BodyState extends State<Body> {
                                   )));
                     });
                   }
+                  print(photoState);
                 }),
             SizedBox(width: size.width * 0.08),
             AlertBtn(
@@ -437,6 +468,22 @@ class _BodyState extends State<Body> {
     List<User> userList = await UserDao.instance.readAllNotes();
     debugPrint(userList.first.id);
     userId = userList.first.id;
+  }
+
+  Future createFile(String fileName) async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    await http.post(
+      Uri.parse(Config.uploadtxt + "?content=$position&fileName=$fileName"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+    ).then((response) {
+      var body = json.decode(response.body);
+      var logMessage = body['message'];
+      print(response.statusCode);
+      print(logMessage);
+    });
   }
 
   routeToCustomerWeb() {

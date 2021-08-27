@@ -12,8 +12,11 @@ import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
+import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/customer/customer_photo.dart';
+import 'package:webcam_app/screen/component/counter.dart';
 import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
@@ -23,11 +26,12 @@ import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:device_info/device_info.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
+import 'package:provider/provider.dart';
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
 var channel;
 FlutterUploader _uploader = FlutterUploader();
-var uploadUrl = "http://172.20.10.10:8080/uploadVideo";
+var uploadUrl = Config.uploadPic;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var flutterLocalNotificationsPlugin;
@@ -145,9 +149,24 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF333333),
-      body: Center(child: Image(image: AssetImage("assets/images/ubLogo.png"))),
-    );
+        body: Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+            Color(0xFF7dcfc8),
+            Color(0xFF79ccc9),
+            Color(0xFF70c8cb),
+            Color(0xFF69c4cd),
+            Color(0xFF4db7d4),
+            Color(0xFF30a9dd),
+            Color(0xFF22a3e0),
+          ])),
+      child:
+          Center(child: Image(image: AssetImage("assets/images/ubLogo.png"))),
+    ));
   }
 }
 
@@ -155,40 +174,49 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: Future.delayed(Duration(seconds: 2)),
-        builder: (context, AsyncSnapshot snapshot) {
-          // if (snapshot.connectionState == ConnectionState.waiting) {
-          //   return MaterialApp(debugShowCheckedModeBanner: false,home: SplashPage());
-          // } else {
-          // Loading is done, return the app:
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: '視訊系統',
-            // theme: new ThemeData(b ),
-            home: HomeScreen(
-              flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-              channel: channel,
-            ),
-            builder: EasyLoading.init(),
-            routes: {
-              CustomerRegisterScreen.routeName: (context) =>
-                  CustomerRegisterScreen(),
-              CustomerOptionsScreen.routeName: (context) =>
-                  CustomerOptionsScreen(),
-              CustomerPhotoScreen.routeName: (context) => CustomerPhotoScreen(),
-              // CustomerWebRTC.routeName: (context) => CustomerWebRTC(
-              //     uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
-              CustomerPhotoDocScreen.routeName: (context) =>
-                  CustomerPhotoDocScreen(),
-              ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
+    return ChangeNotifierProvider(
+        create: (_) => Counter(),
+        child: FutureBuilder(
+            future: Future.delayed(Duration(seconds: 2)),
+            builder: (context, AsyncSnapshot snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return MaterialApp(
+                    debugShowCheckedModeBanner: false, home: SplashPage());
+              } else {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: '視訊系統',
+                  // theme: new ThemeData(b ),
+                  home: HomeScreen(
+                    flutterLocalNotificationsPlugin:
+                        flutterLocalNotificationsPlugin,
+                    channel: channel,
+                  ),
+                  builder: EasyLoading.init(),
+                  routes: {
+                    CustomerRegisterScreen.routeName: (context) =>
+                        CustomerRegisterScreen(),
+                    CustomerOptionsScreen.routeName: (context) =>
+                        CustomerOptionsScreen(),
+                    // CustomerPhotoScreen.routeName: (context) =>
+                    //     CustomerPhotoScreen(),
+                    // CustomerWebRTC.routeName: (context) => CustomerWebRTC(
+                    //     uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
+                    CustomerPhotoScreen.routeName: (context) =>
+                        CustomerPhotoScreen(),
+                    // CustomerWebRTC.routeName: (context) => CustomerWebRTC(
+                    //     uploader: _uploader, uploadURL: Uri.parse(uploadUrl)),
+                    CustomerMaunalScreen.routeName: (context) =>
+                        CustomerMaunalScreen(),
+                    CustomerPhotoDocScreen.routeName: (context) =>
+                        CustomerPhotoDocScreen(),
+                    ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
 
-              fileUpload.routeName: (context) => fileUpload()
-            },
-          );
-        }
-        // }
-        );
+                    fileUpload.routeName: (context) => fileUpload()
+                  },
+                );
+              }
+            }));
   }
 }
 
@@ -261,10 +289,12 @@ void backgroundHandler() {
       } else if (result.status == UploadTaskStatus.canceled) {
         title = 'Upload Canceled';
       }
+      print(title);
       flutterLocalNotificationsPlugin
           .show(
         result.taskId.hashCode,
         'FlutterUploader Example',
+        '對保影片上傳通知',
         title,
         NotificationDetails(
           android: AndroidNotificationDetails(
