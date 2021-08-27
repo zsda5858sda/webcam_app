@@ -360,12 +360,13 @@ class _BodyState extends State<Body> {
                 btnName: "確認",
                 onPress: () async {
                   if (photoState < 3) {
-                    photoState++;
+                    setState(() {
+                      photoState++;
+                    });
                     print(fileNames);
                     print(filePaths);
                     Navigator.pop(context);
                   } else {
-                    int count = 1;
                     print('準備跳頁');
                     print(fileNames);
                     print(filePaths);
@@ -383,7 +384,6 @@ class _BodyState extends State<Body> {
                             status: '檔案上傳中',
                             maskType: EasyLoadingMaskType.black,
                           );
-                          count++;
                         }
                       });
                     }
