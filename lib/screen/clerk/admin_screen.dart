@@ -1,24 +1,22 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webcam_app/database/dao/userDao.dart';
-import 'package:webcam_app/database/model/user.dart';
+import 'package:provider/provider.dart';
+import 'package:webcam_app/screen/component/counter.dart';
 
 FlutterUploader _uploader = FlutterUploader();
 CameraController? controller;
 List<CameraDescription>? cameras;
+String uploadFilePath = "";
+bool stillInTime = true;
 
 void _camera() async {
   cameras = await availableCameras();
@@ -83,9 +81,15 @@ void backgroundHandler() {
 
       final successful = result.status == UploadTaskStatus.complete;
 
-      var title = 'Upload Complete';
+      var title = '上傳成功';
+      // if (result.status == UploadTaskStatus.complete) {
+      //   File(uploadFilePath).deleteSync();
+      // }
       if (result.status == UploadTaskStatus.failed) {
-        title = 'Upload Failed';
+        if (stillInTime) {
+          _handleFileUpload([uploadFilePath]);
+        }
+        title = '上傳失敗，即將重新上傳';
       } else if (result.status == UploadTaskStatus.canceled) {
         title = 'Upload Canceled';
       }
@@ -93,7 +97,7 @@ void backgroundHandler() {
       notifications
           .show(
         result.taskId.hashCode,
-        'FlutterUploader Example',
+        '對保影像上傳通知',
         title,
         NotificationDetails(
           android: AndroidNotificationDetails(
@@ -116,6 +120,35 @@ void backgroundHandler() {
       });
     });
   });
+}
+
+void _handleFileUpload(List<String> paths) async {
+  print("now is file uploading...");
+  final prefs = await SharedPreferences.getInstance();
+  final binary = prefs.getBool('binary') ?? false;
+  await _uploader.enqueue(_buildUpload(
+    binary,
+    paths.whereType<String>().toList(),
+  ));
+}
+
+Upload _buildUpload(bool binary, List<String> paths) {
+  final tag = 'upload';
+
+  var url = "https://vsid66.ubt.ubot.com.tw/webcam_api/fileuploadservlet";
+
+  return MultipartFormDataUpload(
+    url: url.toString(),
+    data: {'name': 'john'},
+    files: paths
+        .map((e) => FileItem(
+              path: e,
+              field: 'file',
+            ))
+        .toList(),
+    method: UploadMethod.POST,
+    tag: tag,
+  );
 }
 
 class ClerkWebRTC extends StatefulWidget {
@@ -205,6 +238,8 @@ class _ClerkWebRtc extends State<ClerkWebRTC> {
     var sec =
         now.second < 10 ? "0" + now.second.toString() : now.second.toString();
     var datetime = year + month + day + hour + min + sec;
+    var foldertime = year + month + day;
+    var counter = Provider.of<Counter>(context);
     dynamic arguments = ModalRoute.of(context)!.settings.arguments;
 
     // String url = arguments["url"];
@@ -235,13 +270,28 @@ class _ClerkWebRtc extends State<ClerkWebRTC> {
                           String fileName = widget.agentId +
                               '-' +
                               userId.toString() +
+                              '-' +
+                              foldertime +
                               '-b-' +
                               datetime.toString() +
+                              '-' +
                               widget.deparment;
                           debugPrint("this is fileName:" + fileName);
                           final String yourExtension = "webm";
                           _createFileFromBase64(
                               receivedFileInBase64, fileName, yourExtension);
+                          var timer =
+                              Timer.periodic(Duration(seconds: 1), (timer) {
+                            setState(() {
+                              Provider.of<Counter>(context, listen: false)
+                                  .addCount();
+                            });
+                            if (counter.count == 0) {
+                              timer.cancel();
+                              stillInTime = false;
+                              print("上傳時間已到");
+                            }
+                          });
                         } else {
                           debugPrint('data is empty!!');
                         }
@@ -347,6 +397,10 @@ class _ClerkWebRtc extends State<ClerkWebRTC> {
     print("${output.path}/${fileName}.webm");
     // await GallerySaver.saveVideo(file.path);
     _handleFileUpload([file.path]);
+    uploadFilePath = file.path;
+    Timer(Duration(seconds: 10), () {
+      print('Hello world');
+    });
     // File(file.path).deleteSync();
   }
 
@@ -372,7 +426,7 @@ class _ClerkWebRtc extends State<ClerkWebRTC> {
       files: paths
           .map((e) => FileItem(
                 path: e,
-                field: 'videofile',
+                field: 'file',
               ))
           .toList(),
       method: UploadMethod.POST,

@@ -7,15 +7,21 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:http/http.dart' as http;
+import 'package:webcam_app/screen/component/counter.dart';
+import 'package:webcam_app/screen/customer/customer_options.dart';
 
 FlutterUploader _uploader = FlutterUploader();
 CameraController? controller;
 List<CameraDescription>? cameras;
+String uploadFilePath = "";
+bool stillGotTime = true;
 
 void _camera() async {
   cameras = await availableCameras();
@@ -80,9 +86,15 @@ void backgroundHandler() {
 
       final successful = result.status == UploadTaskStatus.complete;
 
-      var title = 'Upload Complete';
+      var title = '上傳成功';
+      // if (result.status == UploadTaskStatus.complete) {
+      //   File(uploadFilePath).deleteSync();
+      // }
       if (result.status == UploadTaskStatus.failed) {
-        title = 'Upload Failed';
+        title = '上傳失敗，即將重新上傳';
+        if (stillGotTime) {
+          _handleFileUpload([uploadFilePath]);
+        }
       } else if (result.status == UploadTaskStatus.canceled) {
         title = 'Upload Canceled';
       }
@@ -90,7 +102,7 @@ void backgroundHandler() {
       notifications
           .show(
         result.taskId.hashCode,
-        'FlutterUploader Example',
+        '對保影像上傳通知',
         title,
         NotificationDetails(
           android: AndroidNotificationDetails(
@@ -104,8 +116,7 @@ void backgroundHandler() {
                 : Importance.min,
           ),
           iOS: IOSNotificationDetails(
-            presentAlert: true,
-          ),
+              presentAlert: true, presentBadge: true, subtitle: "對保影片上傳通知"),
         ),
       )
           .catchError((e, stack) {
@@ -113,6 +124,35 @@ void backgroundHandler() {
       });
     });
   });
+}
+
+void _handleFileUpload(List<String> paths) async {
+  print("now is file uploading...");
+  final prefs = await SharedPreferences.getInstance();
+  final binary = prefs.getBool('binary') ?? false;
+  await _uploader.enqueue(_buildUpload(
+    binary,
+    paths.whereType<String>().toList(),
+  ));
+}
+
+Upload _buildUpload(bool binary, List<String> paths) {
+  final tag = 'upload';
+
+  var url = "https://vsid66.ubt.ubot.com.tw/webcam_api/fileuploadservlet";
+
+  return MultipartFormDataUpload(
+    url: url.toString(),
+    data: {'name': 'john'},
+    files: paths
+        .map((e) => FileItem(
+              path: e,
+              field: 'file',
+            ))
+        .toList(),
+    method: UploadMethod.POST,
+    tag: tag,
+  );
 }
 
 class CustomerWebRTC extends StatefulWidget {
@@ -198,6 +238,8 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     var sec =
         now.second < 10 ? "0" + now.second.toString() : now.second.toString();
     var datetime = year + month + day + hour + min + sec;
+    var foldertime = year + month + day;
+    var counter = Provider.of<Counter>(context);
     dynamic arguments = ModalRoute.of(context)!.settings.arguments;
     // String url = arguments["url"];
     return MaterialApp(
@@ -227,12 +269,29 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                         print("this is recievedFile" + receivedFileInBase64);
                         print("this is recievedMime" + receivedMimeType);
                         var platform = Platform.isIOS ? "-i-" : "-a-";
-                        var fileName =
-                            widget.agentId + '-' + userId + platform + datetime;
+                        var fileName = widget.agentId +
+                            '-' +
+                            userId +
+                            '-' +
+                            foldertime +
+                            platform +
+                            datetime;
                         debugPrint(fileName);
                         final String yourExtension = "webm";
                         _createFileFromBase64(
                             receivedFileInBase64, fileName, yourExtension);
+                        var timer =
+                            Timer.periodic(Duration(seconds: 1), (timer) {
+                          setState(() {
+                            Provider.of<Counter>(context, listen: false)
+                                .addCount2();
+                          });
+                          if (counter.count2 == 0) {
+                            timer.cancel();
+                            stillGotTime = false;
+                            print("上傳時間已到");
+                          }
+                        });
                       } else {
                         debugPrint('data is empty!!');
                       }
@@ -311,12 +370,33 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                     });
                   }
                   if (consoleMessage.message.contains('in RecordStart')) {
-                    getStartTimeTxt(widget.agentId);
+                    var now = DateTime.now();
+                    var year = now.year.toString();
+                    var month = now.month < 10
+                        ? "0" + now.month.toString()
+                        : now.month.toString();
+                    var day = now.day < 10
+                        ? "0" + now.day.toString()
+                        : now.day.toString();
+                    var datetime = year + month + day;
+                    getStartTimeTxt(widget.agentId, datetime);
                   }
                   if (consoleMessage.message
                       .contains('in mystopRecording now')) {
-                    getStopTimeTxt(widget.agentId);
+                    var now = DateTime.now();
+                    var year = now.year.toString();
+                    var month = now.month < 10
+                        ? "0" + now.month.toString()
+                        : now.month.toString();
+                    var day = now.day < 10
+                        ? "0" + now.day.toString()
+                        : now.day.toString();
+                    var datetime = year + month + day;
+                    getStopTimeTxt(widget.agentId, datetime);
                   }
+                  // if (consoleMessage.message.contains("很抱歉，我們無法和您建立視訊連結")) {
+                  //   _showMyDialog("無法建立視訊", "很抱歉，我們無法和您建立視訊連結");
+                  // }
                 },
               ),
               progress < 1.0
@@ -346,6 +426,7 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     print("${output.path}/${fileName}.webm");
     Timer(Duration(seconds: 3), () async {
       _handleFileUpload([file.path]);
+      uploadFilePath = file.path;
     });
     // File(file.path).deleteSync();
   }
@@ -371,7 +452,7 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
       files: paths
           .map((e) => FileItem(
                 path: e,
-                field: 'videofile',
+                field: 'file',
               ))
           .toList(),
       method: UploadMethod.POST,
@@ -385,31 +466,66 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     userId = userList.first.id;
   }
 
-  Future getStartTimeTxt(String fileName) async {
+  Future getStartTimeTxt(String fileName, String timeStamp) async {
     List<User> userList = await UserDao.instance.readAllNotes();
-    fileName = fileName + '-' + userList.first.id + "-recordStartTime.txt";
+    fileName = fileName +
+        '-' +
+        userList.first.id +
+        "-" +
+        timeStamp +
+        "-recordStartTime.txt";
     var now = DateTime.now();
     this.startTime = now;
     await http.post(
-      Uri.parse("http://172.20.10.10:8080/uploadTxt" +
-          "?content=$now&fileName=$fileName"),
+      Uri.parse(Config.uploadtxt + "?content=$now&fileName=$fileName"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },
     );
   }
 
-  Future getStopTimeTxt(String fileName) async {
+  Future getStopTimeTxt(String fileName, String timeStamp) async {
     List<User> userList = await UserDao.instance.readAllNotes();
-    fileName = fileName + '-' + userList.first.id + "-recordStopTime.txt";
+    fileName = fileName +
+        '-' +
+        userList.first.id +
+        "-" +
+        timeStamp +
+        "-recordStopTime.txt";
     var now = DateTime.now();
     String totals = now.difference(this.startTime).inSeconds.toString();
     print("here is totalSec" + totals);
     await http.post(
-      Uri.parse("http://172.20.10.10:8080/uploadTxt" +
-          "?content=$totals&fileName=$fileName"),
+      Uri.parse(Config.uploadtxt + "?content=$totals&fileName=$fileName"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
+      },
+    );
+  }
+
+  Future<void> _showMyDialog(String title, String content) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(content),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('了解'),
+              onPressed: () {
+                Navigator.pushNamed(context, CustomerOptionsScreen.routeName);
+              },
+            ),
+          ],
+        );
       },
     );
   }
