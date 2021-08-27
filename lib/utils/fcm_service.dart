@@ -27,7 +27,7 @@ class FCMService {
   static String constructFCMPayload(String token, String agentId) {
     return jsonEncode({
       'to': token,
-      'data': {'url': Config.WEBRTC_URL + '&agentid=$agentId'},
+      'data': {'agentId': agentId},
       'notification': {'title': '聯邦銀行對保通知', 'body': '點擊通知進入對保畫面'},
     });
   }

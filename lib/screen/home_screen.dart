@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
@@ -214,8 +215,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _configureSelectNotificationSubject() {
     selectNotificationSubject.stream.listen((String? payload) async {
-      await updateUrl(payload!);
-      Navigator.pushNamed(context, CustomerPhotoScreen.routeName);
+      if (payload != null) {
+        String url = Config.WEBRTC_URL + '&agentid=$payload';
+        await updateUrl(url);
+        Navigator.pushNamed(context, CustomerPhotoScreen.routeName,
+            arguments: CustomerPhotoArguments(payload));
+      }
     });
   }
 
@@ -239,15 +244,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 icon: 'launch_background',
               ),
             ),
-            payload: message.data['url']);
+            payload: message.data['agentId']);
       }
     });
 
     // 背景監聽消息
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("在背景執行時收到訊息");
-      updateUrl(message.data['url']);
-      Navigator.pushNamed(context, CustomerPhotoScreen.routeName);
+      String agentId = message.data['agentId'];
+      updateUrl(Config.WEBRTC_URL + '&agentid=$agentId');
+      Navigator.pushNamed(context, CustomerPhotoScreen.routeName,
+          arguments: CustomerPhotoArguments(agentId));
     });
   }
 
