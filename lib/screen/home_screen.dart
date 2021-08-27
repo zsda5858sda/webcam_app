@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:device_info/device_info.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +12,7 @@ import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
 import 'package:webcam_app/screen/clerk/clerk_login.dart';
 import 'package:webcam_app/screen/component/button.dart';
+import 'package:webcam_app/screen/component/counter.dart';
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/customer/customer_photo_doc.dart';
 import 'package:webcam_app/screen/customer/customer_register.dart';
@@ -73,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
     _controller.forward();
     _controller2.forward();
+    checkIOSVersion();
     super.initState();
   }
 
@@ -213,14 +219,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  void checkIOSVersion() async {
+    if (Platform.isIOS) {
+      var iosInfo = await DeviceInfoPlugin().iosInfo;
+      var systemName = iosInfo.systemName;
+      var version = iosInfo.systemVersion;
+      if (double.parse(version) < 14.3) {
+        print("您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
+        _showMyDialog("系統需求偵測通知", "您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
+      }
+    }
+  }
+
+  Future<void> _showMyDialog(String title, String content) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(content),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('了解'),
+              onPressed: () {
+                exit(0);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _configureSelectNotificationSubject() {
     selectNotificationSubject.stream.listen((String? payload) async {
-      if (payload != null) {
-        String url = Config.WEBRTC_URL + '&agentid=$payload';
-        await updateUrl(url);
-        Navigator.pushNamed(context, CustomerPhotoScreen.routeName,
-            arguments: CustomerPhotoArguments(payload));
-      }
+      await updateUrl(payload!);
+      print(payload);
+      Navigator.pushNamed(context, CustomerPhotoScreen.routeName,
+          arguments: CustomerPhotoArguments(payload));
     });
   }
 
@@ -246,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             payload: message.data['agentId']);
       }
+      print("recieve notification");
     });
 
     // 背景監聽消息
