@@ -9,8 +9,7 @@ import 'package:webcam_app/database/model/clerk.dart';
 class HttpUtils {
   Future<String> sendLog(String uid, String action, String userType) async {
     var result;
-    // var ip = await Ipify.ipv4();
-    var ip = "0.0.0.0";
+    var ip = await Ipify.ipv4();
     await http.post(Uri.parse(Config.LOG), headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8'
     }, body: """
