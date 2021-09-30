@@ -25,6 +25,7 @@ import 'package:webcam_app/screen/home_screen.dart';
 import 'package:webcam_app/screen/upload/file_upload.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:device_info/device_info.dart';
+import 'package:webcam_app/screen/upload/responses_screen.dart';
 import 'package:webcam_app/utils/fcm_service.dart';
 import 'package:provider/provider.dart';
 
@@ -211,7 +212,7 @@ class MyApp extends StatelessWidget {
                     CustomerPhotoDocScreen.routeName: (context) =>
                         CustomerPhotoDocScreen(),
                     ClerkLoginScreen.routeName: (context) => ClerkLoginScreen(),
-
+                    ResponsesScreen.routeName:(context) => ResponsesScreen(uploader: _uploader),
                     fileUpload.routeName: (context) => fileUpload()
                   },
                 );

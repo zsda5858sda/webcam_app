@@ -9,8 +9,7 @@ import 'package:webcam_app/database/model/clerk.dart';
 class HttpUtils {
   Future<String> sendLog(String uid, String action, String userType) async {
     var result;
-    // var ip = await Ipify.ipv4();
-    var ip = "0.0.0.0";
+    var ip = await Ipify.ipv4();
     await http.post(Uri.parse(Config.LOG), headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8'
     }, body: """
@@ -101,6 +100,26 @@ class HttpUtils {
       print(responseJson);
       if (responseJson["code"] == 1) {
         throw new Exception(result["message"]);
+      }
+    });
+    return result;
+  }
+
+  Future<dynamic> createTxtFile(String fileName, String content) async {
+    var result;
+    await http.post(Uri.parse(Config.uploadtxt), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8'
+    }, body: """
+    {
+      "fileName": "$fileName",
+      "content": "$content"
+    }
+    """).then((response) {
+      var responseJson = json.decode(response.body);
+      result = responseJson["message"];
+      print(responseJson);
+      if (responseJson["code"] == "1") {
+        throw Exception(responseJson["message"]);
       }
     });
     return result;
