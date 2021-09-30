@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
@@ -10,18 +11,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webcam_app/config/config.dart';
 import 'package:webcam_app/database/dao/userDao.dart';
 import 'package:webcam_app/database/model/user.dart';
-import 'package:http/http.dart' as http;
 import 'package:webcam_app/screen/component/counter.dart';
 import 'package:webcam_app/screen/customer/customer_options.dart';
+import 'package:webcam_app/screen/customer/thanks.dart';
+import 'package:webcam_app/screen/upload/responses_screen.dart';
+import 'package:webcam_app/screen/upload/upload_item.dart';
+import 'package:webcam_app/utils/http_utils.dart';
 
 FlutterUploader _uploader = FlutterUploader();
 CameraController? controller;
 List<CameraDescription>? cameras;
 String uploadFilePath = "";
 bool stillGotTime = true;
+double percent = 0.0;
+int uploadcount = 0;
 
 void _camera() async {
   cameras = await availableCameras();
@@ -49,7 +54,7 @@ void backgroundHandler() {
         if (processed.contains(progress.taskId)) {
           return;
         }
-
+        print("now the progress is ${progress.progress}");
         notifications.show(
           progress.taskId.hashCode,
           'FlutterUploader Example',
@@ -81,7 +86,8 @@ void backgroundHandler() {
 
       processed.add(result.taskId);
       preferences.setStringList('processed', processed);
-
+      uploadcount++;
+      print("here is uploadcount" + uploadcount.toString());
       notifications.cancel(result.taskId.hashCode);
 
       final successful = result.status == UploadTaskStatus.complete;
@@ -178,7 +184,16 @@ class CustomerWebRTC extends StatefulWidget {
 
 class _CustomerWebRtc extends State<CustomerWebRTC> {
   final GlobalKey webViewKey = GlobalKey();
+  double _progress = 0;
   InAppWebViewController? webViewController;
+  StreamSubscription<UploadTaskProgress>? _progressSubscription;
+  StreamSubscription<UploadTaskResponse>? _resultSubscription;
+  Timer? _timer;
+  int count = 0;
+  int uploadCount = 0;
+  int totalTask = 0;
+  bool recordEnd = false;
+  Map<String, UploadItem> _tasks = {};
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
           useOnDownloadStart: true,
@@ -193,7 +208,8 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
       ));
 
   PullToRefreshController? pullToRefreshController;
-  double progress = 0;
+  double currentProgress = 0.0;
+  late String numb;
   final urlController = TextEditingController();
   var userId;
   @override
@@ -201,6 +217,12 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     super.initState();
     _camera();
     getUserid();
+    EasyLoading.addStatusCallback((status) {
+      print('EasyLoading Status $status');
+      if (status == EasyLoadingStatus.dismiss) {
+        print('cancel');
+      }
+    });
     _uploader.setBackgroundHandler(backgroundHandler);
     pullToRefreshController = PullToRefreshController(
       options: PullToRefreshOptions(
@@ -215,6 +237,57 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
         }
       },
     );
+    _progressSubscription = widget.uploader.progress.listen((progress) {
+      final task = _tasks[progress.taskId];
+      if (task == null) return;
+      if (task.isCompleted()) return;
+      if (!task.isCompleted()) {
+        print('In MAIN APP: ID: ${progress.taskId}, progress: ${_progress}');
+        _progress = progress.progress!.toDouble() / 100;
+        var tmp = <String, UploadItem>{}..addAll(_tasks);
+        tmp.putIfAbsent(progress.taskId, () => UploadItem(progress.taskId));
+        tmp[progress.taskId] =
+            task.copyWith(progress: progress.progress, status: progress.status);
+        setState(() => _tasks = tmp);
+      }
+    }, onError: (ex, stacktrace) {
+      print('exception: $ex');
+      print('stacktrace: $stacktrace');
+    });
+
+    _resultSubscription = widget.uploader.result.listen((result) {
+      var tmp = <String, UploadItem>{}..addAll(_tasks);
+      numb = result.taskId;
+      print("now the num is ${numb}");
+
+      tmp.putIfAbsent(result.taskId, () => UploadItem(result.taskId));
+      tmp[result.taskId] =
+          tmp[result.taskId]!.copyWith(status: result.status, response: result);
+      print("total finished tasked is " + tmp.length.toString());
+      if (totalTask != 0) {
+        if ((totalTask + count) == tmp.length) {
+          print("totalTask + 總共錄幾個:" +
+              (totalTask + count).toString() +
+              " = " +
+              tmp.length.toString());
+          EasyLoading.showSuccess("影片處理完成！",
+              duration: Duration(milliseconds: 2000));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ThanksScreen(
+                        count: count,
+                        userId: userId,
+                        agentId: widget.agentId,
+                      ),
+                  maintainState: false));
+        }
+      }
+      setState(() => _tasks = tmp);
+    }, onError: (ex, stacktrace) {
+      print('exception: $ex');
+      print('stacktrace: $stacktrace');
+    });
   }
 
   @override
@@ -266,8 +339,6 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                         final String receivedFileInBase64 = data[0];
                         final String receivedMimeType = data[1];
                         // NOTE: create a method that will handle your extensions
-                        print("this is recievedFile" + receivedFileInBase64);
-                        print("this is recievedMime" + receivedMimeType);
                         var platform = Platform.isIOS ? "-i-" : "-a-";
                         var fileName = widget.agentId +
                             '-' +
@@ -275,23 +346,30 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                             '-' +
                             foldertime +
                             platform +
-                            datetime;
+                            datetime +
+                            "-" +
+                            count.toString();
                         debugPrint(fileName);
-                        final String yourExtension = "webm";
+                        final String yourExtension;
+                        if (Platform.isIOS) {
+                          yourExtension = "mp4";
+                        } else {
+                          yourExtension = "webm";
+                        }
                         _createFileFromBase64(
                             receivedFileInBase64, fileName, yourExtension);
-                        var timer =
-                            Timer.periodic(Duration(seconds: 1), (timer) {
-                          setState(() {
-                            Provider.of<Counter>(context, listen: false)
-                                .addCount2();
-                          });
-                          if (counter.count2 == 0) {
-                            timer.cancel();
-                            stillGotTime = false;
-                            print("上傳時間已到");
-                          }
-                        });
+                        // var timer =
+                        //     Timer.periodic(Duration(seconds: 1), (timer) {
+                        //   setState(() {
+                        //     Provider.of<Counter>(context, listen: false)
+                        //         .addCount2();
+                        //   });
+                        //   if (counter.count2 == 0) {
+                        //     timer.cancel();
+                        //     stillGotTime = false;
+                        //     print("上傳時間已到");
+                        //   }
+                        // });
                       } else {
                         debugPrint('data is empty!!');
                       }
@@ -352,9 +430,6 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                   if (progress == 100) {
                     pullToRefreshController!.endRefreshing();
                   }
-                  setState(() {
-                    this.progress = progress / 100;
-                  });
                 },
                 onUpdateVisitedHistory: (controller, url, androidIsReload) {
                   setState(() {});
@@ -382,7 +457,13 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                     getStartTimeTxt(widget.agentId, datetime);
                   }
                   if (consoleMessage.message
-                      .contains('in mystopRecording now')) {
+                          .contains("in mystopRecording now") ||
+                      consoleMessage.message
+                          .contains("in finalstopRecording now")) {
+                    count++;
+                  }
+                  if (consoleMessage.message.contains("錄影結束")) {
+                    recordEnd = true;
                     var now = DateTime.now();
                     var year = now.year.toString();
                     var month = now.month < 10
@@ -393,15 +474,18 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
                         : now.day.toString();
                     var datetime = year + month + day;
                     getStopTimeTxt(widget.agentId, datetime);
+                    await EasyLoading.showSuccess("錄影結束，請稍等影片處理...",
+                        duration: Duration(milliseconds: 2000));
+                    await EasyLoading.show(
+                      status: '正在處理對保影片，請稍候...',
+                      maskType: EasyLoadingMaskType.black,
+                    );
                   }
                   // if (consoleMessage.message.contains("很抱歉，我們無法和您建立視訊連結")) {
                   //   _showMyDialog("無法建立視訊", "很抱歉，我們無法和您建立視訊連結");
                   // }
                 },
               ),
-              progress < 1.0
-                  ? LinearProgressIndicator(value: progress)
-                  : Container(),
             ],
           ),
         ),
@@ -410,6 +494,7 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
   }
 
   var startTime;
+  var countFileName;
   _createFileFromBase64(
       String base64content, String fileName, String yourExtension) async {
     print("now is in createFileBase64");
@@ -423,29 +508,35 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     }
     final file = File("${output!.path}/$fileName.$yourExtension");
     await file.writeAsBytes(bytes.buffer.asUint8List());
-    print("${output.path}/${fileName}.webm");
-    Timer(Duration(seconds: 3), () async {
-      _handleFileUpload([file.path]);
-      uploadFilePath = file.path;
-    });
+    print("${output.path}/${fileName}.${yourExtension}");
+    _handleFileUpload([file.path]);
+    uploadFilePath = file.path;
     // File(file.path).deleteSync();
   }
 
   void _handleFileUpload(List<String> paths) async {
     print("now is file uploading...");
+    uploadCount++;
     final prefs = await SharedPreferences.getInstance();
     final binary = prefs.getBool('binary') ?? false;
-    await widget.uploader.enqueue(_buildUpload(
+    await widget.uploader
+        .enqueue(_buildUpload(
       binary,
       paths.whereType<String>().toList(),
-    ));
+    ))
+        .whenComplete(() {
+      if (recordEnd) {
+        totalTask = _tasks.length;
+        print("總共錄了 ${count}個檔案");
+        getTotalFileCount(widget.agentId);
+      }
+    });
   }
 
   Upload _buildUpload(bool binary, List<String> paths) {
     final tag = 'upload';
 
     var url = widget.uploadURL;
-
     return MultipartFormDataUpload(
       url: url.toString(),
       data: {'name': 'john'},
@@ -464,43 +555,50 @@ class _CustomerWebRtc extends State<CustomerWebRTC> {
     List<User> userList = await UserDao.instance.readAllNotes();
     debugPrint(userList.first.id);
     userId = userList.first.id;
+    userId = userList.first.id;
+    if (userId.toString().length == 11) {
+      userId = userId.toString().substring(0, 10);
+    }
+  }
+
+  Future getTotalFileCount(String fileName) async {
+    var now = DateTime.now();
+    var year = now.year.toString();
+    var month =
+        now.month < 10 ? "0" + now.month.toString() : now.month.toString();
+    var day = now.day < 10 ? "0" + now.day.toString() : now.day.toString();
+    var datetime = year + month + day;
+    fileName =
+        fileName + '-' + userId + "-" + datetime + "-customerFileCount.txt";
+    HttpUtils().createTxtFile(fileName, count.toString());
   }
 
   Future getStartTimeTxt(String fileName, String timeStamp) async {
     List<User> userList = await UserDao.instance.readAllNotes();
-    fileName = fileName +
-        '-' +
-        userList.first.id +
-        "-" +
-        timeStamp +
-        "-recordStartTime.txt";
+    var userId = userList.first.id.toString();
+    if (userId.length == 11) {
+      userId = userId.substring(0, 10);
+    }
+    fileName =
+        fileName + '-' + userId + "-" + timeStamp + "-recordStartTime.txt";
+    countFileName = fileName;
     var now = DateTime.now();
     this.startTime = now;
-    await http.post(
-      Uri.parse(Config.uploadtxt + "?content=$now&fileName=$fileName"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-    );
+    HttpUtils().createTxtFile(fileName, now.toString());
   }
 
   Future getStopTimeTxt(String fileName, String timeStamp) async {
     List<User> userList = await UserDao.instance.readAllNotes();
-    fileName = fileName +
-        '-' +
-        userList.first.id +
-        "-" +
-        timeStamp +
-        "-recordStopTime.txt";
+    var userId = userList.first.id.toString();
+    if (userId.length == 11) {
+      userId = userId.substring(0, 10);
+    }
+    fileName =
+        fileName + '-' + userId + "-" + timeStamp + "-recordStopTime.txt";
     var now = DateTime.now();
     String totals = now.difference(this.startTime).inSeconds.toString();
     print("here is totalSec" + totals);
-    await http.post(
-      Uri.parse(Config.uploadtxt + "?content=$totals&fileName=$fileName"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-    );
+    HttpUtils().createTxtFile(fileName, totals);
   }
 
   Future<void> _showMyDialog(String title, String content) async {

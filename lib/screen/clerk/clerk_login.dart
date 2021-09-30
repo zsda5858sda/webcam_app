@@ -32,7 +32,7 @@ final List<String> imgList = [
 ];
 
 final String webRtcUrl =
-    "https://172.20.10.10:82/main/Svideocall2.html?agentid=";
+    "https://vsid66.ubt.ubot.com.tw/main/Svideocall2.html?agentid=";
 // "https://172.20.10.10:82/main/Svideocall2.html?agentid=";
 
 FlutterUploader _uploader = FlutterUploader();
