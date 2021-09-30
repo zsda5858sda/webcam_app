@@ -16,7 +16,7 @@
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 
-  <application android:label="webcam_app" android:icon="@mipmap/ic_launcher" android:name="androidx.multidex.MultiDexApplication"  android:networkSecurityConfig="@xml/network_security_config">
+  <application android:label="聯邦視訊對保" android:icon="@mipmap/ic_launcher" android:name="androidx.multidex.MultiDexApplication"  android:networkSecurityConfig="@xml/network_security_config">
 
     <provider android:name="com.pichillilorenzo.flutter_inappwebview.InAppWebViewFileProvider" android:authorities="${applicationId}.flutter_inappwebview.fileprovider" android:exported="false" android:grantUriPermissions="true">
       <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
