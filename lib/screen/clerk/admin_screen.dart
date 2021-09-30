@@ -231,7 +231,11 @@ class _ClerkWebRtc extends State<ClerkWebRTC> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ThanksScreen(count: count),
+                  builder: (context) => ThanksScreen(
+                        count: count,
+                        userId: userId,
+                        agentId: widget.agentId,
+                      ),
                   maintainState: false));
         }
       }
