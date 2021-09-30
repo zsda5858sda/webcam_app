@@ -21,6 +21,7 @@ import 'package:path/path.dart' as path;
 import 'package:webcam_app/screen/customer/customer_meet.dart';
 import 'package:webcam_app/screen/upload/upload_item.dart';
 import 'package:http/http.dart' as http;
+import 'package:webcam_app/utils/http_utils.dart';
 import 'package:webcam_app/utils/responsive_app.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
@@ -391,16 +392,20 @@ class _BodyState extends State<Body> {
                     print(filePaths);
                     Navigator.pop(context);
                   } else {
-                    print('準備跳頁');
-                    print(fileNames);
-                    print(filePaths);
+                    await EasyLoading.show(
+                      status: '檔案上傳中',
+                      maskType: EasyLoadingMaskType.black,
+                    );
                     Navigator.pop(context);
-                    await createFile(widget.agentId +
+                    String fileName = widget.agentId +
                         '-' +
                         userId +
                         "-" +
                         datetime.toString() +
-                        "-location.txt");
+                        "-location.txt";
+                    Position position = await Geolocator.getCurrentPosition(
+                        desiredAccuracy: LocationAccuracy.high);
+                    HttpUtils().createTxtFile(fileName, position.toString());
                     for (int i = 0; i < fileNames.length; i++) {
                       File file = File(filePaths[i]);
                       print(fileNames.length);
@@ -417,10 +422,6 @@ class _BodyState extends State<Body> {
                         if (response.statusCode == 200) {
                           print("上傳成功！");
                           File(filePaths[i]).deleteSync();
-                          await EasyLoading.show(
-                            status: '檔案上傳中',
-                            maskType: EasyLoadingMaskType.black,
-                          );
                         }
                       });
                     }
@@ -458,6 +459,7 @@ class _BodyState extends State<Body> {
 
     // Show the dialog
     showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
           return dialog;
@@ -468,22 +470,9 @@ class _BodyState extends State<Body> {
     List<User> userList = await UserDao.instance.readAllNotes();
     debugPrint(userList.first.id);
     userId = userList.first.id;
-  }
-
-  Future createFile(String fileName) async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    await http.post(
-      Uri.parse(Config.uploadtxt + "?content=$position&fileName=$fileName"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-    ).then((response) {
-      var body = json.decode(response.body);
-      var logMessage = body['message'];
-      print(response.statusCode);
-      print(logMessage);
-    });
+    if (userId.toString().length == 11) {
+      userId = userId.toString().substring(0, 10);
+    }
   }
 
   routeToCustomerWeb() {

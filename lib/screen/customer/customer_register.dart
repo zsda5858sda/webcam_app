@@ -127,13 +127,14 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                                     final promiseResolved = await jsRuntime
                                         .handlePromise(asyncResult);
                                     if (promiseResolved.stringResult
-                                        .contains("validateResult: true")) {
+                                        .contains('"validateResult":true')) {
                                       print("身分證格式正確");
                                       setState(() {
                                         idFormat = false;
                                       });
                                     } else {
-                                      print("身分證格式錯誤");
+                                      print("身分證格式錯誤" +
+                                          promiseResolved.stringResult);
                                       setState(() {
                                         idFormat = true;
                                       });
@@ -178,7 +179,8 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                                       onPressed: () async {
                                         if (HBCode.code ==
                                             hbCodeController.text) {
-                                          String id = idController.text;
+                                          String id =
+                                              idController.text.toUpperCase();
                                           String phone = phoneController.text;
                                           String? token =
                                               await FCMService.getToken();
@@ -186,7 +188,9 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                                             if (id.isEmpty || phone.isEmpty) {
                                               throw new NullThrownError();
                                             }
-
+                                            if (idFormat) {
+                                              throw new Exception(["證件格式錯誤"]);
+                                            }
                                             await register(id, phone, token);
                                             addUserToLocalDB(id, phone);
                                             await showAlertDialog(
