@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
     _controller.forward();
     _controller2.forward();
-    checkIOSVersion();
+    // checkIOSVersion();
     super.initState();
   }
 
@@ -219,17 +219,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  void checkIOSVersion() async {
-    if (Platform.isIOS) {
-      var iosInfo = await DeviceInfoPlugin().iosInfo;
-      var systemName = iosInfo.systemName;
-      var version = iosInfo.systemVersion;
-      if (double.parse(version) < 14.3) {
-        print("您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
-        _showMyDialog("系統需求偵測通知", "您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
-      }
-    }
-  }
+  // void checkIOSVersion() async {
+  //   if (Platform.isIOS) {
+  //     var iosInfo = await DeviceInfoPlugin().iosInfo;
+  //     var systemName = iosInfo.systemName;
+  //     var version = iosInfo.systemVersion;
+  //     if (double.parse(version) < 14.3) {
+  //       print("您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
+  //       _showMyDialog("系統需求偵測通知", "您當前的IOS版本為$version，系統最低需求為14.7，很抱歉無法提供使用");
+  //     }
+  //   }
+  // }
 
   Future<void> _showMyDialog(String title, String content) async {
     return showDialog<void>(
